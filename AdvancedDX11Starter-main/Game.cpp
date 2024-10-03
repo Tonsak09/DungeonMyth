@@ -44,7 +44,7 @@ Game::Game(HINSTANCE hInstance)
 		720,				// Height of the window's client area
 		false,				// Sync the framerate to the monitor refresh? (lock framerate)
 		true),				// Show extra stats (fps) in title bar?
-	camera(0),
+	/*camera(0),*/
 	sky(0),
 	lightCount(0),
 	showUIDemoWindow(false),
@@ -53,7 +53,7 @@ Game::Game(HINSTANCE hInstance)
 	// Seed random
 	srand((unsigned int)time(0));
 
-	playersData = new PlayersData();
+	playersData = std::make_shared<PlayersData>();
 
 
 #if defined(DEBUG) || defined(_DEBUG)
@@ -75,8 +75,6 @@ Game::~Game()
 	// we don't need to explicitly clean up those DirectX objects
 	// - If we weren't using smart pointers, we'd need
 	//   to call Release() on each DirectX object
-
-	delete playersData;
 
 	// ImGui clean up
 	ImGui_ImplDX11_Shutdown();
@@ -118,15 +116,11 @@ void Game::Init()
 		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	}
 
-	// Create the camera
-	camera = std::make_shared<Camera>();
-	InitCamera(camera.get(), 
-		DirectX::XMFLOAT3(0.0f, 0.0f, -15.0f),	// Position
-		XM_PIDIV4,			// Field of view
-		(float)windowWidth / windowHeight,  // Aspect ratio
-		0.01f,				// Near clip
-		100.0f,				// Far clip
-		CameraProjectionType::Perspective);
+	ShowCursor(FALSE);
+
+	// Set initial player data 
+	AddPlayer(playersData.get(), "Eureka", (float)windowWidth / (float)windowHeight);
+	playersData->transforms[0].SetPosition(0.0f, 0.0f, -10.0f);
 }
 
 
@@ -473,8 +467,10 @@ void Game::OnResize()
 	DXCore::OnResize();
 
 	// Update our projection matrix to match the new aspect ratio
-	if (camera)
-		UpdateProjectionMatrix(camera.get(), this->windowWidth / (float)this->windowHeight);
+	for (int i = 0; i < playersData->cams.size(); i++)
+	{
+		UpdateProjectionMatrix(&playersData->cams[i], this->windowWidth / (float)this->windowHeight);
+	}
 }
 
 // --------------------------------------------------------
@@ -490,6 +486,8 @@ void Game::Update(float deltaTime, float totalTime)
 
 	// Update the camera
 	//camera->Update(deltaTime);
+	std::vector<PlayerInput> inputs = PlayersInputs();
+	TransformPlayers(playersData.get(), inputs, deltaTime);
 
 	// Check individual input
 	Input& input = Input::GetInstance();
@@ -530,7 +528,7 @@ void Game::Draw(float deltaTime, float totalTime)
 		ps->CopyBufferData("perFrame");
 
 		// Draw the entity
-		ge->Draw(context, camera);
+		ge->Draw(context, &playersData->cams[0]);
 	}
 
 	// Draw the light sources?
@@ -538,7 +536,7 @@ void Game::Draw(float deltaTime, float totalTime)
 		DrawPointLights();
 
 	// Draw the sky
-	sky->Draw(camera);
+	sky->Draw(&playersData->cams[0]);
 
 	// Frame END
 	// - These should happen exactly ONCE PER FRAME
@@ -572,8 +570,8 @@ void Game::DrawPointLights()
 	lightPS->SetShader();
 
 	// Set up vertex shader
-	lightVS->SetMatrix4x4("view", camera->viewMatrix);
-	lightVS->SetMatrix4x4("projection", camera->projMatrix);
+	lightVS->SetMatrix4x4("view", playersData->cams[0].viewMatrix);
+	lightVS->SetMatrix4x4("projection", playersData->cams[0].projMatrix);
 
 	for (int i = 0; i < lightCount; i++)
 	{

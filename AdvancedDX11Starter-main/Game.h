@@ -12,7 +12,7 @@
 #include <wrl/client.h>
 #include <vector>
 
-#include "Player.h";
+#include "Player.h"
 
 class Game 
 	: public DXCore
@@ -33,10 +33,10 @@ private:
 
 	// Our scene
 	std::vector<std::shared_ptr<GameEntity>> entities;
-	std::shared_ptr<Camera> camera;
+	//std::shared_ptr<Camera> camera;
 
 	// Player
-	PlayersData* playersData; 
+	std::shared_ptr<PlayersData> playersData;
 
 	// Lights
 	std::vector<Light> lights;

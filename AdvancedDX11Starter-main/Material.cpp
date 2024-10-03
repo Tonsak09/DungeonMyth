@@ -103,7 +103,7 @@ void Material::PrepareMaterial(Transform* transform, std::shared_ptr<FreeCamera>
 	for (auto& s : samplers) { ps->SetSamplerState(s.first.c_str(), s.second.Get()); }
 }
 
-void Material::PrepareMaterial(Transform* transform, std::shared_ptr<Camera> camera)
+void Material::PrepareMaterial(Transform* transform, Camera* camera)
 {
 	// Turn on these shaders
 	vs->SetShader();

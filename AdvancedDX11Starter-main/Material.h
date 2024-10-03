@@ -41,7 +41,7 @@ public:
 	void RemoveSampler(std::string name);
 
 	void PrepareMaterial(Transform* transform, std::shared_ptr<FreeCamera> camera);
-	void PrepareMaterial(Transform* transform, std::shared_ptr<Camera> camera);
+	void PrepareMaterial(Transform* transform, Camera* camera);
 
 private:
 

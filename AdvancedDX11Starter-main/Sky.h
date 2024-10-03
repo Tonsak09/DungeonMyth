@@ -66,7 +66,7 @@ public:
 	~Sky();
 
 	void Draw(std::shared_ptr<FreeCamera> camera);
-	void Draw(std::shared_ptr<Camera> camera);
+	void Draw(Camera* camera);
 
 private:
 
