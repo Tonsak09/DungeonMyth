@@ -14,6 +14,12 @@
 
 #include "Player.h"
 
+enum MouseState
+{
+	LOCKED,
+	FREE
+};
+
 class Game 
 	: public DXCore
 {
@@ -33,7 +39,7 @@ private:
 
 	// Our scene
 	std::vector<std::shared_ptr<GameEntity>> entities;
-	//std::shared_ptr<Camera> camera;
+	bool updateMouseDelta; 
 
 	// Player
 	std::shared_ptr<PlayersData> playersData;

@@ -160,9 +160,12 @@ HRESULT DXCore::InitWindow()
 	// Initialize the input manager now that we definitely have a window
 	Input::GetInstance().Initialize(hWnd);
 
+	// Cursor setup 
+	ShowCursor(FALSE);
 	RECT r;
 	GetWindowRect(hWnd, &r);
 	ClipCursor(&r);
+	SetCursorPos(640, 360);
 
 
 	// Return an "everything is ok" HRESULT value

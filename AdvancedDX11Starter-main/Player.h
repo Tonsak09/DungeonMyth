@@ -72,6 +72,8 @@ static void AddPlayer(PlayersData* data, std::string id, float camRatio)
 static void TransformPlayers(PlayersData* data, std::vector<PlayerInput> inputs, float delta)
 {
 
+	// TODO: Split into multiple for loops to avoid cache misses 
+
 	for (int i = 0; i < data->transforms.size(); i++)
 	{
 		// Translate base position 
@@ -99,6 +101,7 @@ static void TransformPlayers(PlayersData* data, std::vector<PlayerInput> inputs,
 		data->cams[i].transform.SetPosition(camPos);
 
 
+
 		// Rotation 
 		DirectX::XMFLOAT2 mouseDelta = inputs[i].mouseDelta;
 
@@ -109,6 +112,8 @@ static void TransformPlayers(PlayersData* data, std::vector<PlayerInput> inputs,
 		data->cams[i].transform.Rotate(
 			data->turnSpeed[i] * mouseDelta.y * delta,
 			data->turnSpeed[i] * mouseDelta.x * delta, 0.0f);
+
+		//printf("%f, %f\n", mouseDelta.x, mouseDelta.y);
 
 
 		UpdateViewMatrix(&data->cams[i]);
@@ -122,7 +127,7 @@ static void TransformPlayers(PlayersData* data, std::vector<PlayerInput> inputs,
 /// organizes it into a sweet little vector 
 /// </summary>
 /// <param name="delta"></param>
-static std::vector<PlayerInput> PlayersInputs()
+static std::vector<PlayerInput> PlayersInputs(bool updateMouseDelta)
 {
 	// In its current state only worry about one player's 
 	// inputs 
@@ -136,6 +141,9 @@ static std::vector<PlayerInput> PlayersInputs()
 		PlayerInput curr = PlayerInput();  
 
 
+		
+
+
 		// Directional 
 		DirectX::XMFLOAT3 dirInput;
 		dirInput = DirectX::XMFLOAT3(
@@ -147,21 +155,43 @@ static std::vector<PlayerInput> PlayersInputs()
 			DirectX::XMVector3Normalize(XMLoadFloat3(&dirInput)));
 
 
-
 		// Rotational 
-		float xDiff = input.GetMouseXDelta();
-		float yDiff = input.GetMouseYDelta();
-		DirectX::XMFLOAT2 mouseDelta(xDiff, yDiff);
+		if (updateMouseDelta)
+		{
+			float xMid = 640;
+			float yMid = 360;
 
-		//// Clamp the X rotation
-		//XMFLOAT3 rot = transform.GetPitchYawRoll();
-		//if (rot.x > XM_PIDIV2) rot.x = XM_PIDIV2;
-		//if (rot.x < -XM_PIDIV2) rot.x = -XM_PIDIV2;
+			// Mouse Data
+			POINT mousePosPoint = {};
+			GetCursorPos(&mousePosPoint);
+
+			static DirectX::XMFLOAT2 center = DirectX::XMFLOAT2(xMid, yMid);
+			static DirectX::XMFLOAT2 mousePos;
+
+			mousePos = DirectX::XMFLOAT2(
+				(float)mousePosPoint.x,
+				(float)mousePosPoint.y
+			);
 
 
+			DirectX::XMFLOAT2 delta;
+			DirectX::XMStoreFloat2(&delta, DirectX::XMVectorSubtract(
+				XMLoadFloat2(&mousePos), XMLoadFloat2(&center)));
+
+			float xDiff = abs(delta.x) >= 100.0 ? 0.0 : delta.x;
+			float yDiff = abs(delta.y) >= 100.0 ? 0.0 : delta.y;
+			DirectX::XMFLOAT2 mouseDelta(xDiff, yDiff);
+
+			SetCursorPos(xMid, yMid);
+			curr.mouseDelta = mouseDelta;
+		}
+		else
+		{
+			curr.mouseDelta = DirectX::XMFLOAT2(0.0f, 0.0f);
+		}
+		
 
 		curr.dir = dirInput;
-		curr.mouseDelta = mouseDelta;
 		inputs.push_back(curr);
 	}
 

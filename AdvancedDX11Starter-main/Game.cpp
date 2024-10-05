@@ -48,7 +48,8 @@ Game::Game(HINSTANCE hInstance)
 	sky(0),
 	lightCount(0),
 	showUIDemoWindow(false),
-	showPointLights(false)
+	showPointLights(false),
+	updateMouseDelta(true)
 {
 	// Seed random
 	srand((unsigned int)time(0));
@@ -116,7 +117,6 @@ void Game::Init()
 		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	}
 
-	ShowCursor(FALSE);
 
 	// Set initial player data 
 	AddPlayer(playersData.get(), "Eureka", (float)windowWidth / (float)windowHeight);
@@ -484,13 +484,27 @@ void Game::Update(float deltaTime, float totalTime)
 	UINewFrame(deltaTime);
 	BuildUI();
 
+
 	// Update the camera
-	//camera->Update(deltaTime);
-	std::vector<PlayerInput> inputs = PlayersInputs();
+	std::vector<PlayerInput> inputs = PlayersInputs(updateMouseDelta);
 	TransformPlayers(playersData.get(), inputs, deltaTime);
+
 
 	// Check individual input
 	Input& input = Input::GetInstance();
+
+	static bool heldPrev = false;
+	if (input.KeyDown(VK_TAB) && !heldPrev)
+	{
+		// Toggle mouse constatins 
+		updateMouseDelta = !updateMouseDelta;
+		ShowCursor(!updateMouseDelta);
+		heldPrev = true;
+	}
+	else if (input.KeyUp(VK_TAB))
+	{
+		heldPrev = false; 
+	}
 	if (input.KeyDown(VK_ESCAPE)) Quit();
 	if (input.KeyPress(VK_TAB)) GenerateLights();
 }
