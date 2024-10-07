@@ -7,6 +7,11 @@
 #include "string"
 
 #include "Mesh.h"
+#include "Helpers.h"
+
+// Helper macros for making texture and shader loading code more succinct
+#define LoadTexture(file, srv) CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(file).c_str(), 0, srv.GetAddressOf())
+#define LoadShader(type, file) std::make_shared<type>(device.Get(), context.Get(), FixPath(file).c_str())
 
 enum DebugMeshType
 {
@@ -21,21 +26,52 @@ enum DebugMeshType
 	STRING		= 8
 };
 
+struct DebugEntity
+{
+	std::shared_ptr<GameEntity> entity;
+	DirectX::XMFLOAT3 color;
+
+	DebugEntity() 
+	{
+		entity = nullptr; 
+		color = DirectX::XMFLOAT3(0, 0, 0);
+	}
+};
+
 struct DebugDrawData
 {
+	std::vector<DebugEntity> drawGroup;
+	std::vector<std::shared_ptr<Mesh>> debugMeshes;
+	std::shared_ptr<Material> debugMat;
+
+	std::vector<float> lifeTimes;
+
+	DebugDrawData() {}
+
 	/// <summary>
 	/// Initiate the debug manager 
 	/// </summary>
-	//DebugDrawData(Microsoft::WRL::ComPtr<ID3D11Device> device)
-	//{
-	//	// Import the debug meshes 
-	//}
+	DebugDrawData(
+		Microsoft::WRL::ComPtr<ID3D11DeviceContext> context, 
+		Microsoft::WRL::ComPtr<ID3D11Device> device)
+	{
+		// Load Shaders 
+		std::shared_ptr<SimpleVertexShader> vertexShader = 
+			LoadShader(SimpleVertexShader, L"VertexShader.cso");
+		std::shared_ptr<SimplePixelShader> solidColorPS =
+			LoadShader(SimplePixelShader, L"SolidColorPS.cso");
 
-	std::vector<Mesh> drawGroup; 
-	std::vector<float> lifeTimes; 
+		std::shared_ptr<Mesh> sphereMesh = std::make_shared<Mesh>(
+			FixPath(L"../../Assets/Models/sphere.obj").c_str(), device);
 
-private:
-	Mesh debugMeshes[9];
+		debugMat = std::make_shared<Material>(
+			solidColorPS, vertexShader, DirectX::XMFLOAT3(1, 1, 1), DirectX::XMFLOAT2(2, 2));
+		debugMeshes.push_back(sphereMesh);
+		debugMeshes.push_back(sphereMesh);
+		debugMeshes.push_back(sphereMesh);
+
+		drawGroup = std::vector<DebugEntity>();
+	}
 };
 
 /// <summary>
@@ -63,21 +99,22 @@ static void ManageDebugLife(DebugDrawData* DDD, float delta)
 /// <summary>
 /// Adds a line segement to debug drawing queue 
 /// </summary>
-static void AddLine(
+static void AddDebugLine(
 	DirectX::XMFLOAT3 pointA,
 	DirectX::XMFLOAT3 pointB,
-	DirectX::XMFLOAT4 color,
+	DirectX::XMFLOAT3 color,
 	float lineWidth = 1.0f,
 	float duration = 0.0f)
 {
-
+	// Generate a mesh that simply has its verticies at 
+	// pointA and pointB 
 }
 
 /// <summary>
 /// Adds na axis-aligned cross (3 lines converging at a point)
 /// to the debug drawing queue  
 /// </summary>
-static void AddCross(
+static void AddDebugCross(
 	DirectX::XMFLOAT3 point,
 	DirectX::XMFLOAT4 color,
 	float size,
@@ -89,19 +126,28 @@ static void AddCross(
 /// <summary>
 /// Adds a wireframe sphere to the debug drawing queue 
 /// </summary>
-static void AddSphere(
+static void AddDebugSphere(
+	DebugDrawData* DDD,
 	DirectX::XMFLOAT3 point,
 	float radius,
-	DirectX::XMFLOAT4 color,
+	DirectX::XMFLOAT3 color,
 	float duration = 0.0f)
 {
+	std::shared_ptr<GameEntity> sphere = std::make_shared<GameEntity>(
+		DDD->debugMeshes[SPHERE], DDD->debugMat);
+	sphere->GetTransform()->SetPosition(point);
+	sphere->GetTransform()->SetScale(radius);
 
+	DebugEntity de;
+	de.entity = sphere;
+	de.color = color;
+	DDD->drawGroup.push_back(de);
 }
 
 /// <summary>
 /// Adds a circle to the debug drawing queue 
 /// </summary>
-static void AddCircle(
+static void AddDebugCircle(
 	DirectX::XMFLOAT3 point,
 	DirectX::XMFLOAT3 normal,
 	float radius,
@@ -116,7 +162,7 @@ static void AddCircle(
 /// position and orientation ofthe given
 /// transformation to the debug drawing queue 
 /// </summary>
-static void AddAxes(
+static void AddDebugAxes(
 	Transform& xfm,
 	DirectX::XMFLOAT4 color,
 	float size,
@@ -128,7 +174,7 @@ static void AddAxes(
 /// <summary>
 /// Adds a wireframe triangle to the debug drawing queue 
 /// </summary>
-static void AddTriangle(
+static void AddDebugTriangle(
 	DirectX::XMFLOAT3 vertA,
 	DirectX::XMFLOAT3 vertB,
 	DirectX::XMFLOAT3 vertC,
@@ -148,7 +194,7 @@ static void AddTriangle(
 /// <param name="color"></param>
 /// <param name="lineWidth"></param>
 /// <param name="duration"></param>
-static void AddAABB(
+static void AddDebugAABB(
 	DirectX::XMFLOAT3 minCoords,
 	DirectX::XMFLOAT3 maxCoords,
 	DirectX::XMFLOAT4 color,
@@ -161,7 +207,7 @@ static void AddAABB(
 /// <summary>
 /// Adds an oriented bounding box to the debug queue 
 /// </summary>
-static void AddOBB(
+static void AddDebugOBB(
 	DirectX::XMFLOAT4X4 centerTransform,
 	DirectX::XMFLOAT3 scaleXYZ,
 	DirectX::XMFLOAT4 color,
@@ -174,7 +220,7 @@ static void AddOBB(
 /// <summary>
 /// Adds a text string to the debug drawing queue 
 /// </summary>
-static void AddString(
+static void AddDebugString(
 	DirectX::XMFLOAT3 pos,
 	std::string text,
 	DirectX::XMFLOAT4 color,

@@ -25,7 +25,7 @@ using namespace DirectX;
 
 // Helper macros for making texture and shader loading code more succinct
 #define LoadTexture(file, srv) CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(file).c_str(), 0, srv.GetAddressOf())
-#define LoadShader(type, file) std::make_shared<type>(device.Get(), context.Get(), FixPath(file).c_str())
+#define LoadShader(type, file) std::make_shared<type>(device.Get(), context.Get(), FixPath(file).c_str()) 
 
 
 // --------------------------------------------------------
@@ -96,6 +96,9 @@ void Game::Init()
 	ImGui_ImplDX11_Init(device.Get(), context.Get());
 	ImGui::StyleColorsDark();
 
+	// Add Debug Drawer 
+	debugDrawData = DebugDrawData(context, device);
+
 	// Asset loading and entity creation
 	LoadAssetsAndCreateEntities();
 	
@@ -117,8 +120,7 @@ void Game::Init()
 		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	}
 
-	// Add Debug Drawer 
-	//debugDrawData = DebugDrawData(device);
+
 
 	// Set initial player data 
 	AddPlayer(playersData.get(), "Eureka", (float)windowWidth / (float)windowHeight);
@@ -401,6 +403,14 @@ void Game::LoadAssetsAndCreateEntities()
 	entities.push_back(woodSphere);
 
 
+	// Add Debug mesh
+	AddDebugSphere(
+		&debugDrawData,
+		DirectX::XMFLOAT3(0, 0, 0),
+		1.0f, 
+		DirectX::XMFLOAT3(1.0, 0.5, 0.5));
+
+
 	// Save assets needed for drawing point lights
 	lightMesh = sphereMesh;
 	lightVS = vertexShader;
@@ -533,6 +543,7 @@ void Game::Draw(float deltaTime, float totalTime)
 		context->ClearDepthStencilView(depthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
 
+	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// Draw all of the entities
 	for (auto& ge : entities)
@@ -552,11 +563,27 @@ void Game::Draw(float deltaTime, float totalTime)
 		ge->Draw(context, &playersData->cams[0]);
 	}
 
+
+	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+
+	//device->RSSetState();
+	for (auto& ge : debugDrawData.drawGroup)
+	{
+		std::shared_ptr<SimplePixelShader> ps = ge.entity->GetMaterial()->GetPixelShader();
+		ps->SetFloat3("Color", ge.color);
+		ps->CopyBufferData("perFrame");
+
+		// Draw the entity
+		ge.entity->Draw(context, &playersData->cams[0]);
+	}
+
+
 	// Draw the light sources?
 	if(showPointLights)
 		DrawPointLights();
 
 	// Draw the sky
+	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	sky->Draw(&playersData->cams[0]);
 
 	// Frame END

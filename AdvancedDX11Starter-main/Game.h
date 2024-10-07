@@ -79,6 +79,6 @@ private:
 	bool showUIDemoWindow;
 
 	// Debug Drawing
-	//DebugDrawData debugDrawData; 
+	DebugDrawData debugDrawData; 
 };
 
