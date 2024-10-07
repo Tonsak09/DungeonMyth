@@ -14,6 +14,8 @@
 
 #include "Player.h"
 
+#include "DebugDrawManager.h"
+
 enum MouseState
 {
 	LOCKED,
@@ -75,5 +77,8 @@ private:
 	
 	// Should the ImGui demo window be shown?
 	bool showUIDemoWindow;
+
+	// Debug Drawing
+	//DebugDrawData debugDrawData; 
 };
 

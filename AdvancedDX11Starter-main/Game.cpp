@@ -117,6 +117,8 @@ void Game::Init()
 		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	}
 
+	// Add Debug Drawer 
+	//debugDrawData = DebugDrawData(device);
 
 	// Set initial player data 
 	AddPlayer(playersData.get(), "Eureka", (float)windowWidth / (float)windowHeight);

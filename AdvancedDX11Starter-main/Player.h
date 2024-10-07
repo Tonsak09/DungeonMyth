@@ -25,8 +25,11 @@ public:
 	std::vector<Transform> transforms;
 	std::vector<Camera> cams;
 	std::vector<float> camHeight;
-	std::vector<float> moveSpeed;
-	std::vector<float> turnSpeed; 
+	std::vector<float> playerAcls;		// Acceleration 
+	std::vector<float> playerDAcls;		// Acceleration 
+	std::vector<DirectX::XMFLOAT3> playerVels;		// Velocity  
+	std::vector<float> playerMaxSpeed;	// Max Speed  
+	std::vector<float> turnSpeed; // Necessary? 
 };
 
 /// <summary>
@@ -60,7 +63,10 @@ static void AddPlayer(PlayersData* data, std::string id, float camRatio)
 	data->cams.push_back(camera);
 	data->transforms.push_back(Transform());
 	data->camHeight.push_back(0.0f);
-	data->moveSpeed.push_back(5.0f);
+	data->playerAcls.push_back(5.0f);
+	data->playerDAcls.push_back(20.0f);
+	data->playerVels.push_back(DirectX::XMFLOAT3(0, 0, 0));
+	data->playerMaxSpeed.push_back(5.0f);
 	data->turnSpeed.push_back(1.0f);
 }
 
@@ -77,21 +83,105 @@ static void TransformPlayers(PlayersData* data, std::vector<PlayerInput> inputs,
 	for (int i = 0; i < data->transforms.size(); i++)
 	{
 		// Translate base position 
-		DirectX::XMFLOAT3 dir = inputs[i].dir;
+		DirectX::XMFLOAT3 dir = inputs[i].dir; // WASD input 
 
-		float s = data->moveSpeed[i] * delta;
+		// Old Working 
+		/*float s = data->playerMaxSpeed[i] * delta;
 		DirectX::XMFLOAT3 scale = DirectX::XMFLOAT3(s, s, s);
 
-		DirectX::XMFLOAT3 baseFinal;
-		DirectX::XMVECTOR diff = DirectX::XMVectorMultiply(DirectX::XMLoadFloat3(&dir), DirectX::XMLoadFloat3(&scale));
-		DirectX::XMStoreFloat3(&baseFinal, diff);
+		DirectX::XMFLOAT3 baseFinalVel;
+		DirectX::XMVECTOR diff = DirectX::XMVectorMultiply(
+			DirectX::XMLoadFloat3(&dir), 
+			DirectX::XMLoadFloat3(&scale));
+		DirectX::XMStoreFloat3(&baseFinalVel, diff);*/
 
-		data->transforms[i].MoveRelative(baseFinal);
 
-		DirectX::XMFLOAT3 pos = data->transforms[i].GetPosition();
+		// New physical movement 
+		DirectX::XMFLOAT3 cVel = data->playerVels[i];
+		float cAcl = data->playerAcls[i]; // Player's accel 
+		DirectX::XMVECTOR vel = DirectX::XMLoadFloat3( 
+			&cVel); // Current vel 
+
+		float acl = delta * cAcl;
+		DirectX::XMVECTOR deltaV;
+		deltaV = DirectX::XMVectorScale( // Change in vel 
+			DirectX::XMLoadFloat3(&dir),
+			acl);
+		
+		// Clamp new velocity 
+		vel = DirectX::XMVectorAdd(vel, deltaV); // Combine 
+		DirectX::XMFLOAT3 combined; 
+		DirectX::XMStoreFloat3(&combined, vel);
+
+		/*printf("%i, %i\n", 
+			abs(dir.x) >= 0.1f, 
+			abs(dir.z) >= 0.1f);*/
+
+		if (abs(dir.x) >= 0.1f || abs(dir.z) >= 0.1f)
+		{
+			DirectX::XMVECTOR vLength = 
+				DirectX::XMVector3Length(vel);
+			DirectX::XMFLOAT3 speed; // Magnitude of vel 
+			DirectX::XMStoreFloat3(&speed, vLength);
+
+			//vel = DirectX::XMVector3ClampLength( // Clamp 
+			//	vel,
+			//	-1.0f,
+			//	1.0);
+
+			// Check if speed is out of range 
+			if (abs(speed.x) >= data->playerMaxSpeed[i])
+			{
+				vel = DirectX::XMVectorScale(
+					DirectX::XMVector3Normalize(vel),
+					data->playerMaxSpeed[i]);
+			}
+
+			
+
+
+			// Store new velocity 
+			DirectX::XMStoreFloat3(&cVel, vel);
+
+			// Stop movement in direction if intent is opposite 
+			if (dir.x * cVel.x < 0.0)
+			{
+				cVel.x = 0.0f;
+			}
+
+			if (dir.z * cVel.z < 0.0)
+			{
+				cVel.z = 0.0f;
+			}
+
+		}
+		else
+		{
+			float dacl = data->playerDAcls[i] * delta;
+
+			data->playerVels[i] = DirectX::XMFLOAT3(
+				cVel.x = (cVel.x < 0 ? 
+					min(0, cVel.x + dacl) :
+					max(0, cVel.x - dacl)),
+				cVel.y, 
+				cVel.z = (cVel.z < 0 ?
+					min(0, cVel.z + dacl) :
+					max(0, cVel.z - dacl)));
+		}
+
+		// Use displacement 
+		DirectX::XMFLOAT3 d; 
+		DirectX::XMVECTOR displacement = DirectX::XMVectorScale( 
+			vel, 
+			delta);
+		DirectX::XMStoreFloat3(&d, displacement);
+		data->transforms[i].MoveRelative(d);
+		data->playerVels[i] = cVel;
+
 
 
 		// Camera position offset 
+		DirectX::XMFLOAT3 pos = data->transforms[i].GetPosition();
 		DirectX::XMFLOAT3 camPos; 
 		DirectX::XMFLOAT3 up = data->transforms[i].GetUp();
 		DirectX::XMStoreFloat3(&camPos, 
@@ -113,8 +203,12 @@ static void TransformPlayers(PlayersData* data, std::vector<PlayerInput> inputs,
 			data->turnSpeed[i] * mouseDelta.y * delta,
 			data->turnSpeed[i] * mouseDelta.x * delta, 0.0f);
 
-		//printf("%f, %f\n", mouseDelta.x, mouseDelta.y);
 
+		// Clamp the X rotation
+		DirectX::XMFLOAT3 rot = data->cams[i].transform.GetPitchYawRoll();
+		printf("%f\n", rot.x);
+		rot.x = max(-1.2f, min(rot.x, 1.2f));
+		data->cams[i].transform.SetRotation(rot);
 
 		UpdateViewMatrix(&data->cams[i]);
 	}
@@ -139,9 +233,6 @@ static std::vector<PlayerInput> PlayersInputs(bool updateMouseDelta)
 	{ // Represents a single player 
 
 		PlayerInput curr = PlayerInput();  
-
-
-		
 
 
 		// Directional 
