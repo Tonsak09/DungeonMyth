@@ -500,7 +500,12 @@ void Game::Update(float deltaTime, float totalTime)
 	{
 		// Toggle mouse constatins 
 		updateMouseDelta = !updateMouseDelta;
+		SetCursorPos(
+			GetSystemMetrics(SM_CXSCREEN) / 2, 
+			GetSystemMetrics(SM_CYSCREEN) / 2);
+
 		ShowCursor(!updateMouseDelta);
+
 		heldPrev = true;
 	}
 	else if (input.KeyUp(VK_TAB))

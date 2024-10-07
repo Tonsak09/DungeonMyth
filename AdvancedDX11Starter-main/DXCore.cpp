@@ -165,7 +165,9 @@ HRESULT DXCore::InitWindow()
 	RECT r;
 	GetWindowRect(hWnd, &r);
 	ClipCursor(&r);
-	SetCursorPos(640, 360);
+	SetCursorPos(
+		GetSystemMetrics(SM_CXSCREEN) / 2,
+		GetSystemMetrics(SM_CYSCREEN) / 2);
 
 
 	// Return an "everything is ok" HRESULT value

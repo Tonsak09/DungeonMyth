@@ -249,8 +249,8 @@ static std::vector<PlayerInput> PlayersInputs(bool updateMouseDelta)
 		// Rotational 
 		if (updateMouseDelta)
 		{
-			float xMid = 640;
-			float yMid = 360;
+			static int xMid = GetSystemMetrics(SM_CXSCREEN) / 2;
+			static int yMid = GetSystemMetrics(SM_CYSCREEN) / 2;
 
 			// Mouse Data
 			POINT mousePosPoint = {};
