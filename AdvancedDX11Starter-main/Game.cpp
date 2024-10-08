@@ -404,12 +404,18 @@ void Game::LoadAssetsAndCreateEntities()
 
 
 	// Add Debug mesh
-	AddDebugSphere(
+	/*AddDebugSphere(
 		&debugDrawData,
 		DirectX::XMFLOAT3(0, 0, 0),
 		1.0f, 
-		DirectX::XMFLOAT3(1.0, 0.5, 0.5));
+		DirectX::XMFLOAT3(1.0, 0.5, 0.5));*/
 
+	AddDebugLine(
+		&debugDrawData,
+		device,
+		DirectX::XMFLOAT3(0, 0, 0),
+		DirectX::XMFLOAT3(0, 5, 0),
+		DirectX::XMFLOAT3(1, 0, 0));
 
 	// Save assets needed for drawing point lights
 	lightMesh = sphereMesh;

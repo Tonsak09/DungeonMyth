@@ -100,6 +100,8 @@ static void ManageDebugLife(DebugDrawData* DDD, float delta)
 /// Adds a line segement to debug drawing queue 
 /// </summary>
 static void AddDebugLine(
+	DebugDrawData* DDD,
+	Microsoft::WRL::ComPtr<ID3D11Device> device,
 	DirectX::XMFLOAT3 pointA,
 	DirectX::XMFLOAT3 pointB,
 	DirectX::XMFLOAT3 color,
@@ -108,6 +110,28 @@ static void AddDebugLine(
 {
 	// Generate a mesh that simply has its verticies at 
 	// pointA and pointB 
+
+	Vertex vertA = {};
+	Vertex vertB = {};
+	vertA.Position = DirectX::XMFLOAT3(pointA);
+	vertB.Position = DirectX::XMFLOAT3(pointB);
+
+	Vertex* vertArr = new Vertex[3];
+	vertArr[0] = vertA;
+	vertArr[1] = vertB;
+	vertArr[2] = vertB;
+
+	unsigned int indexArr[] = { 0, 1, 1 };
+	std::shared_ptr<Mesh> lineMesh = std::make_shared<Mesh>(vertArr, 3, indexArr, 3, device);
+
+	std::shared_ptr<GameEntity> sphere = std::make_shared<GameEntity>(
+		lineMesh, DDD->debugMat);
+	sphere->GetTransform()->SetPosition(pointA);
+
+	DebugEntity de;
+	de.entity = sphere;
+	de.color = color;
+	DDD->drawGroup.push_back(de);
 }
 
 /// <summary>
