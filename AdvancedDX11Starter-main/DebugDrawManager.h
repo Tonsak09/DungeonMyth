@@ -116,6 +116,11 @@ static void AddDebugLine(
 	vertA.Position = DirectX::XMFLOAT3(pointA);
 	vertB.Position = DirectX::XMFLOAT3(pointB);
 
+	// Note: Use three instead of two because
+	//		 our mesh data structure creates
+	//		 some values for each vertex when
+	//		 loaded intro intialization 
+
 	Vertex* vertArr = new Vertex[3];
 	vertArr[0] = vertA;
 	vertArr[1] = vertB;
@@ -123,6 +128,8 @@ static void AddDebugLine(
 
 	unsigned int indexArr[] = { 0, 1, 1 };
 	std::shared_ptr<Mesh> lineMesh = std::make_shared<Mesh>(vertArr, 3, indexArr, 3, device);
+	delete[] vertArr;
+
 
 	std::shared_ptr<GameEntity> sphere = std::make_shared<GameEntity>(
 		lineMesh, DDD->debugMat);

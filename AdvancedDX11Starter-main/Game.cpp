@@ -147,6 +147,7 @@ void Game::LoadAssetsAndCreateEntities()
 	std::shared_ptr<Mesh> helixMesh = std::make_shared<Mesh>(FixPath(L"../../Assets/Models/helix.obj").c_str(), device);
 	std::shared_ptr<Mesh> cubeMesh = std::make_shared<Mesh>(FixPath(L"../../Assets/Models/cube.obj").c_str(), device);
 	std::shared_ptr<Mesh> coneMesh = std::make_shared<Mesh>(FixPath(L"../../Assets/Models/cone.obj").c_str(), device);
+	std::shared_ptr<Mesh> planeMesh = std::make_shared<Mesh>(FixPath(L"../../Assets/Models/plane.obj").c_str(), device);
 	
 	// Declare the textures we'll need
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cobbleA,  cobbleN,  cobbleR,  cobbleM;
@@ -357,6 +358,10 @@ void Game::LoadAssetsAndCreateEntities()
 	woodSpherePBR->GetTransform()->SetPosition(6, 2, 0);
 	woodSpherePBR->GetTransform()->SetScale(2, 2, 2);
 
+	std::shared_ptr<GameEntity> stonePlanePBR = std::make_shared<GameEntity>(planeMesh, roughMat);
+	stonePlanePBR->GetTransform()->SetPosition(0, 0, 0);
+	stonePlanePBR->GetTransform()->SetScale(5);
+
 	entities.push_back(cobSpherePBR);
 	entities.push_back(floorSpherePBR);
 	entities.push_back(paintSpherePBR);
@@ -364,34 +369,35 @@ void Game::LoadAssetsAndCreateEntities()
 	entities.push_back(bronzeSpherePBR);
 	entities.push_back(roughSpherePBR);
 	entities.push_back(woodSpherePBR);
+	entities.push_back(stonePlanePBR);
 
 	// Create the non-PBR entities ==============================
 	std::shared_ptr<GameEntity> cobSphere = std::make_shared<GameEntity>(sphereMesh, cobbleMat2x);
-	cobSphere->GetTransform()->SetPosition(-6, -2, 0);
+	cobSphere->GetTransform()->SetPosition(-6, 4, 0);
 	cobSphere->GetTransform()->SetScale(2, 2, 2);
 
 	std::shared_ptr<GameEntity> floorSphere = std::make_shared<GameEntity>(sphereMesh, floorMat);
-	floorSphere->GetTransform()->SetPosition(-4, -2, 0);
+	floorSphere->GetTransform()->SetPosition(-4, 4, 0);
 	floorSphere->GetTransform()->SetScale(2, 2, 2);
 
 	std::shared_ptr<GameEntity> paintSphere = std::make_shared<GameEntity>(sphereMesh, paintMat);
-	paintSphere->GetTransform()->SetPosition(-2, -2, 0);
+	paintSphere->GetTransform()->SetPosition(-2, 4, 0);
 	paintSphere->GetTransform()->SetScale(2, 2, 2);
 
 	std::shared_ptr<GameEntity> scratchSphere = std::make_shared<GameEntity>(sphereMesh, scratchedMat);
-	scratchSphere->GetTransform()->SetPosition(0, -2, 0);
+	scratchSphere->GetTransform()->SetPosition(0, 4, 0);
 	scratchSphere->GetTransform()->SetScale(2, 2, 2);
 
 	std::shared_ptr<GameEntity> bronzeSphere = std::make_shared<GameEntity>(sphereMesh, bronzeMat);
-	bronzeSphere->GetTransform()->SetPosition(2, -2, 0);
+	bronzeSphere->GetTransform()->SetPosition(2, 4, 0);
 	bronzeSphere->GetTransform()->SetScale(2, 2, 2);
 
 	std::shared_ptr<GameEntity> roughSphere = std::make_shared<GameEntity>(sphereMesh, roughMat);
-	roughSphere->GetTransform()->SetPosition(4, -2, 0);
+	roughSphere->GetTransform()->SetPosition(4, 4, 0);
 	roughSphere->GetTransform()->SetScale(2, 2, 2);
 
 	std::shared_ptr<GameEntity> woodSphere = std::make_shared<GameEntity>(sphereMesh, woodMat);
-	woodSphere->GetTransform()->SetPosition(6, -2, 0);
+	woodSphere->GetTransform()->SetPosition(6, 4, 0);
 	woodSphere->GetTransform()->SetScale(2, 2, 2);
 
 	entities.push_back(cobSphere);
@@ -410,12 +416,12 @@ void Game::LoadAssetsAndCreateEntities()
 		1.0f, 
 		DirectX::XMFLOAT3(1.0, 0.5, 0.5));*/
 
-	AddDebugLine(
+	/*AddDebugLine(
 		&debugDrawData,
 		device,
 		DirectX::XMFLOAT3(0, 0, 0),
 		DirectX::XMFLOAT3(0, 5, 0),
-		DirectX::XMFLOAT3(1, 0, 0));
+		DirectX::XMFLOAT3(1, 0, 0));*/
 
 	// Save assets needed for drawing point lights
 	lightMesh = sphereMesh;

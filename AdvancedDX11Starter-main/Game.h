@@ -16,12 +16,6 @@
 
 #include "DebugDrawManager.h"
 
-enum MouseState
-{
-	LOCKED,
-	FREE
-};
-
 class Game 
 	: public DXCore
 {

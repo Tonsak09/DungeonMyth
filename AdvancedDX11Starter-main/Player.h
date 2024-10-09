@@ -62,7 +62,7 @@ static void AddPlayer(PlayersData* data, std::string id, float camRatio)
 
 	data->cams.push_back(camera);
 	data->transforms.push_back(Transform());
-	data->camHeight.push_back(0.0f);
+	data->camHeight.push_back(2.0f);
 	data->playerAcls.push_back(15.0f);
 	data->playerDcls.push_back(30.0f);
 	data->playerVels.push_back(DirectX::XMFLOAT3(0, 0, 0));
@@ -167,15 +167,16 @@ static void TransformPlayers(PlayersData* data, std::vector<PlayerInput> inputs,
 
 
 		// Camera position offset 
-		DirectX::XMFLOAT3 pos = data->transforms[i].GetPosition();
 		DirectX::XMFLOAT3 camPos; 
+		DirectX::XMFLOAT3 pos = data->transforms[i].GetPosition();
 		DirectX::XMFLOAT3 up = data->transforms[i].GetUp();
 		DirectX::XMStoreFloat3(&camPos, 
 			DirectX::XMVectorAdd(
 				DirectX::XMLoadFloat3(&pos), 
-				DirectX::XMLoadFloat3(&up)));
+				DirectX::XMVectorScale(
+					DirectX::XMLoadFloat3(&up), 
+					data->camHeight[i])));
 		data->cams[i].transform.SetPosition(camPos);
-
 
 
 		// Rotation 
