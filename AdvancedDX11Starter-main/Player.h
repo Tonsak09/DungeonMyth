@@ -8,6 +8,22 @@
 #include "Input.h"
 
 /// <summary>
+/// Holds data relating to moving the player and
+/// transform related information 
+/// </summary>
+struct PlayerTransformData
+{
+	Transform transform;
+	Camera cam;
+	float camHeight;
+	float playerAcl;
+	float playerDcl;
+	float maxSpeed;
+	float mouseSensitivity; 
+	DirectX::XMFLOAT3 moveVel; 
+};
+
+/// <summary>
 /// Holds data relating to all players on the server 
 /// </summary>
 struct PlayersData
@@ -22,6 +38,8 @@ public:
 	// Player Inventory Hands 
 
 	// Player Transform Data
+	std::vector<PlayerTransformData> transformData; 
+
 	std::vector<Transform> transforms;
 	std::vector<Camera> cams;
 	std::vector<float> camHeight;
