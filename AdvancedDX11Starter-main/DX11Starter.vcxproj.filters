@@ -181,5 +181,8 @@
     <FxCompile Include="PixelCommon.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="SolidGrey.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

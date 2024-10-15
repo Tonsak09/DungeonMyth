@@ -46,6 +46,12 @@ SamplerState BasicSampler : register(s0);
 // Entry point for this pixel shader
 float4 main(VertexToPixel input) : SV_TARGET
 {
+    //return float4(worldLight.Color, 1.0);
+    //return float4(1, 0, 0, 1);
+    
+    
+    
+    
 	// Always re-normalize interpolated direction vectors
     input.normal = normalize(input.normal);
     input.tangent = normalize(input.tangent);
@@ -68,7 +74,8 @@ float4 main(VertexToPixel input) : SV_TARGET
     float3 totalColor = float3(0, 0, 0);
 
     totalColor += DirLight(worldLight, input.normal, input.worldPos, cameraPosition, specPower, surfaceColor.rgb);
-
+    totalColor = HeightFogColor(10.0f, 15.0f, -2.0f, -3.0f, cameraPosition, input.worldPos, totalColor, float3(0.2f, 0.2f, 0.25f));
+    
 	// Gamma correction
     return float4(pow(totalColor, 1.0f / 2.2f), 1);
 }

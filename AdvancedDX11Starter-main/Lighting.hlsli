@@ -304,5 +304,26 @@ float3 SpotLightPBR(Light light, float3 normal, float3 worldPos, float3 camPos, 
 	return PointLightPBR(light, normal, worldPos, camPos, roughness, metalness, surfaceColor, specularColor) * penumbra;
 }
 
+// === DISTANCE FOG ===============================================
+
+float3 FogColor(float fogStart, float fogStop, float3 eyePos, float3 worldPos, float3 col, float3 fogCol)
+{
+    float f = max((min(abs(length(eyePos - worldPos)), fogStop) - fogStart) / (fogStop - fogStart), 0);
+    return (1.0f - f) * col + f * fogCol;
+}
+
+float3 HeightFogColor(float fogDepthStart, float fogDepthStop, float fogHeightMax, float fogHeightMin, float3 eyePos, float3 worldPos, float3 col, float3 fogCol)
+{
+    float f = max((min(abs(length(eyePos - worldPos)), fogDepthStop) - fogDepthStart) / (fogDepthStop - fogDepthStart), 0);
+    float3 fc = (1.0f - f) * col + f * fogCol;
+	
+	// -k * (height - fogBaseHeight)
+    //float clampedY = max(worldPos.y, fogHeightMin); //clamp(worldPos.y, fogHeightMax, fogHeightMax);
+    //float h = (clampedY - fogHeightMax) / (fogHeightMin - clampedY);
+    //return lerp(col, fc, saturate(h));
+	
+    float h = -0.3f * (worldPos.y - fogHeightMax);
+    return lerp(col, fc, saturate(h));
+}
 
 #endif
