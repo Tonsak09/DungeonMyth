@@ -28,7 +28,10 @@ void GameEntity::Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context, std::
 void GameEntity::Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context, Camera* camera)
 {
 	// Set up the material (shaders)
-	material->PrepareMaterial(&transform, camera);
+	//material->PrepareMaterial(&transform, camera);
+
+	// Sets the texture SRVs and smaples of the material 
+	material->PrepareMaterial();
 
 	// Draw the mesh
 	mesh->SetBuffersAndDraw(context);

@@ -459,6 +459,8 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+
+
 	// Set buffer data specifically for the CommonPixel shader 
 	SetCommonPixel(
 		entities[0]->GetMaterial(), 
@@ -468,10 +470,11 @@ void Game::Draw(float deltaTime, float totalTime)
 	// Draw all of the entities
 	for (auto& ge : entities)
 	{
-		/*std::shared_ptr<SimplePixelShader> ps = ge->GetMaterial()->GetPixelShader();
-		ps->SetData("worldLight", &lights[0], sizeof(Light));
-		ps->SetFloat3("cameraPosition", playersData->cams[0].transform.GetPosition());
-		ps->CopyBufferData("perFrame");*/
+		// Vertex data is updated per entity 
+		SetVertexShader(
+			ge->GetMaterial()->GetVertexShader(),
+			ge->GetTransform(),
+			&playersData->cams[0]);
 
 		// Draw the entity
 		ge->Draw(context, &playersData->cams[0]);
