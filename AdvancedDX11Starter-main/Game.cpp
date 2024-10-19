@@ -149,6 +149,7 @@ void Game::LoadAssetsAndCreateEntities()
 	std::shared_ptr<Mesh> coneMesh = std::make_shared<Mesh>(FixPath(L"../../Assets/Models/cone.obj").c_str(), device);
 	std::shared_ptr<Mesh> planeMesh = std::make_shared<Mesh>(FixPath(L"../../Assets/Models/plane.obj").c_str(), device);
 	std::shared_ptr<Mesh> sampleLevel = std::make_shared<Mesh>(FixPath(L"../../Assets/Models/SampleLevel.obj").c_str(), device);
+	std::shared_ptr<Mesh> skelly = std::make_shared<Mesh>(FixPath(L"../../Assets/Models/Skelly.obj").c_str(), device);
 	
 	// Declare the textures we'll need
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cobbleA,  cobbleN,  cobbleR,  cobbleM;
@@ -309,6 +310,10 @@ void Game::LoadAssetsAndCreateEntities()
 	sampleLv->GetTransform()->SetPosition(0, -5, 0);
 	sampleLv->GetTransform()->SetScale(1, 1, 1);
 
+	std::shared_ptr<GameEntity> skellyEnt = std::make_shared<GameEntity>(skelly, roughMat);
+	skellyEnt->GetTransform()->Rotate(25, -2.5, 0);
+
+
 	entities.push_back(cobSphere);
 	entities.push_back(floorSphere);
 	entities.push_back(paintSphere);
@@ -317,6 +322,7 @@ void Game::LoadAssetsAndCreateEntities()
 	entities.push_back(roughSphere);
 	entities.push_back(woodSphere);
 	entities.push_back(sampleLv);
+	entities.push_back(skellyEnt);
 
 
 	// Save assets needed for drawing point lights
@@ -453,27 +459,30 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+	// Set buffer data specifically for the CommonPixel shader 
+	SetCommonPixel(
+		entities[0]->GetMaterial(), 
+		lights[0], 
+		playersData->cams[0].transform.GetPosition());
+
 	// Draw all of the entities
 	for (auto& ge : entities)
 	{
-		// Set the "per frame" data
-		// Note that this should literally be set once PER FRAME, before
-		// the draw loop, but we're currently setting it per entity since 
-		// we are just using whichever shader the current entity has.  
-		// Inefficient!!!
-		std::shared_ptr<SimplePixelShader> ps = ge->GetMaterial()->GetPixelShader();
+		/*std::shared_ptr<SimplePixelShader> ps = ge->GetMaterial()->GetPixelShader();
 		ps->SetData("worldLight", &lights[0], sizeof(Light));
 		ps->SetFloat3("cameraPosition", playersData->cams[0].transform.GetPosition());
-		ps->CopyBufferData("perFrame");
+		ps->CopyBufferData("perFrame");*/
 
 		// Draw the entity
 		ge->Draw(context, &playersData->cams[0]);
 	}
 
 
+
+#if defined(DEBUG) || defined(_DEBUG)
+	// Debug Drawing 
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 
-	//device->RSSetState();
 	for (auto& ge : debugDrawData.drawGroup)
 	{
 		std::shared_ptr<SimplePixelShader> ps = ge.entity->GetMaterial()->GetPixelShader();
@@ -483,6 +492,9 @@ void Game::Draw(float deltaTime, float totalTime)
 		// Draw the entity
 		ge.entity->Draw(context, &playersData->cams[0]);
 	}
+#endif
+
+	
 
 
 	// Draw the light sources?

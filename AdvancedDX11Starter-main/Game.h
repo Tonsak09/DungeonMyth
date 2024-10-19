@@ -15,6 +15,7 @@
 #include "Player.h"
 
 #include "DebugDrawManager.h"
+#include "ShaderHelper.h"
 
 class Game 
 	: public DXCore

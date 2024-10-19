@@ -127,3 +127,10 @@ void Material::PrepareMaterial(Transform* transform, Camera* camera)
 	for (auto& t : textureSRVs) { ps->SetShaderResourceView(t.first.c_str(), t.second.Get()); }
 	for (auto& s : samplers) { ps->SetSamplerState(s.first.c_str(), s.second.Get()); }
 }
+
+void Material::PrepareMaterial()
+{
+	// Loop and set any other resources
+	for (auto& t : textureSRVs) { ps->SetShaderResourceView(t.first.c_str(), t.second.Get()); }
+	for (auto& s : samplers) { ps->SetSamplerState(s.first.c_str(), s.second.Get()); }
+}
