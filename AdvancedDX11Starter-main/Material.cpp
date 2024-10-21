@@ -128,6 +128,10 @@ void Material::PrepareMaterial(Transform* transform, Camera* camera)
 	for (auto& s : samplers) { ps->SetSamplerState(s.first.c_str(), s.second.Get()); }
 }
 
+/// <summary>
+/// Prepares all textures and samplers connected
+/// to this material 
+/// </summary>
 void Material::PrepareMaterial()
 {
 	// Loop and set any other resources

@@ -65,9 +65,13 @@ private:
 	DirectX::XMFLOAT4X4 shadowViewMatrix;
 	DirectX::XMFLOAT4X4 shadowProjectionMatrix;
 
-	std::shared_ptr<SimpleVertexShader> shadowVS;
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState> shadowRasterizer;
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> shadowSampler;
 
-	float shadowMapResolution;
+	std::shared_ptr<SimpleVertexShader> shadowVS;
+	const int SHADOW_MAP_RESOLUTION = 2048;
+
+	
 
 
 	// General helpers for setup and drawing

@@ -55,7 +55,7 @@ Game::Game(HINSTANCE hInstance)
 	srand((unsigned int)time(0));
 
 	playersData = std::make_shared<PlayersData>();
-	shadowMapResolution = 1024; 
+
 
 
 #if defined(DEBUG) || defined(_DEBUG)
@@ -359,11 +359,11 @@ void Game::LoadAssetsAndCreateEntities()
 	cubeB->GetTransform()->SetScale(1.5f);
 
 
-	/*entities.push_back(leftWall);
+	entities.push_back(leftWall);
 	entities.push_back(rightWall);
-	entities.push_back(backWall);*/
+	entities.push_back(backWall);
 	entities.push_back(floor);
-	//entities.push_back(roof);
+	entities.push_back(roof);
 	entities.push_back(cubeA);
 	entities.push_back(cubeB);
 
@@ -441,8 +441,8 @@ void Game::GenerateShadowData()
 {
 	// Create the actual texture that will be the shadow map
 	D3D11_TEXTURE2D_DESC shadowDesc = {};
-	shadowDesc.Width = shadowMapResolution; // Ideally a power of 2 (like 1024)
-	shadowDesc.Height = shadowMapResolution; // Ideally a power of 2 (like 1024)
+	shadowDesc.Width = SHADOW_MAP_RESOLUTION; // Ideally a power of 2 (like 1024)
+	shadowDesc.Height = SHADOW_MAP_RESOLUTION; // Ideally a power of 2 (like 1024)
 	shadowDesc.ArraySize = 1;
 	shadowDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 	shadowDesc.CPUAccessFlags = 0;
@@ -476,6 +476,25 @@ void Game::GenerateShadowData()
 		shadowTexture.Get(),
 		&srvDesc,
 		shadowSRV.GetAddressOf());
+
+	// Shadow rasterizer 
+	D3D11_RASTERIZER_DESC shadowRastDesc = {};
+	shadowRastDesc.FillMode = D3D11_FILL_SOLID;
+	shadowRastDesc.CullMode = D3D11_CULL_BACK;
+	shadowRastDesc.DepthClipEnable = true;
+	shadowRastDesc.DepthBias = 1000; // Min. precision units, not world units!
+	shadowRastDesc.SlopeScaledDepthBias = 1.0f; // Bias more based on slope
+	device->CreateRasterizerState(&shadowRastDesc, &shadowRasterizer);
+
+	// Shadow sampler 
+	D3D11_SAMPLER_DESC shadowSampDesc = {};
+	shadowSampDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
+	shadowSampDesc.ComparisonFunc = D3D11_COMPARISON_LESS;
+	shadowSampDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+	shadowSampDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+	shadowSampDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+	shadowSampDesc.BorderColor[0] = 1.0f; // Only need the first component
+	device->CreateSamplerState(&shadowSampDesc, &shadowSampler);
 }
 
 
@@ -543,6 +562,9 @@ void Game::Update(float deltaTime, float totalTime)
 // --------------------------------------------------------
 void Game::DrawShadowMap()
 {
+	// Set to shadow rasterizer 
+	context->RSSetState(shadowRasterizer.Get());
+
 	// Clear shadow map 
 	context->ClearDepthStencilView(shadowDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
@@ -556,8 +578,8 @@ void Game::DrawShadowMap()
 
 	// Adjust viewport to match shadow map resolution 
 	D3D11_VIEWPORT viewport = {};
-	viewport.Width = (float)shadowMapResolution;
-	viewport.Height = (float)shadowMapResolution;
+	viewport.Width = (float)SHADOW_MAP_RESOLUTION;
+	viewport.Height = (float)SHADOW_MAP_RESOLUTION;
 	viewport.MaxDepth = 1.0f;
 	context->RSSetViewports(1, &viewport);
 
@@ -578,6 +600,8 @@ void Game::DrawShadowMap()
 		e->GetMesh()->SetBuffersAndDraw(context);
 	}
 
+	// Disable shadow rasterizer 
+	context->RSSetState(0);
 
 	// Reset pipeline
 	viewport.Width = (float)this->windowWidth;
@@ -587,6 +611,8 @@ void Game::DrawShadowMap()
 		1,
 		backBufferRTV.GetAddressOf(),
 		depthBufferDSV.Get());
+
+	
 }
 
 // --------------------------------------------------------
@@ -613,9 +639,10 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	// Set buffer data specifically for the CommonPixel shader 
 	SetCommonPixel(
-		entities[0]->GetMaterial(), 
-		lights[0], 
-		playersData->cams[0].transform.GetPosition());
+		entities[0]->GetMaterial(),
+		lights[0],
+		playersData->cams[0].transform.GetPosition(),
+		shadowSRV, shadowSampler);
 
 	// Draw all of the entities
 	for (auto& ge : entities)
@@ -624,12 +651,13 @@ void Game::Draw(float deltaTime, float totalTime)
 		SetVertexShader(
 			ge->GetMaterial()->GetVertexShader(),
 			ge->GetTransform(),
-			&playersData->cams[0]);
-
+			&playersData->cams[0], 
+			shadowViewMatrix,
+			shadowProjectionMatrix);
+		
 		// Draw the entity
 		ge->Draw(context, &playersData->cams[0]);
 	}
-
 
 
 #if defined(DEBUG) || defined(_DEBUG)
@@ -676,6 +704,10 @@ void Game::Draw(float deltaTime, float totalTime)
 
 		// Must re-bind buffers after presenting, as they become unbound
 		context->OMSetRenderTargets(1, backBufferRTV.GetAddressOf(), depthBufferDSV.Get());
+	
+		// Unbind shadowmap 
+		ID3D11ShaderResourceView* nullSRVs[128] = {};
+		context->PSSetShaderResources(0, 128, nullSRVs);
 	}
 }
 

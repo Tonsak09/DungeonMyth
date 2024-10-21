@@ -33,6 +33,7 @@ struct VertexToPixel
     float3 normal : NORMAL;
     float3 tangent : TANGENT;
     float3 worldPos : POSITION; // The world position of this PIXEL
+    float4 shadowMapPos : SHADOW_POSITION;
 };
 
 
@@ -40,17 +41,33 @@ struct VertexToPixel
 Texture2D Albedo : register(t0);
 Texture2D NormalMap : register(t1);
 Texture2D RoughnessMap : register(t2);
+Texture2D ShadowMap : register(t3);
 SamplerState BasicSampler : register(s0);
-
+SamplerComparisonState ShadowSampler : register(s1);
 
 // Entry point for this pixel shader
 float4 main(VertexToPixel input) : SV_TARGET
 {
-    //return float4(worldLight.Color, 1.0);
-    //return float4(1, 0, 0, 1);
     
+    // Shadows
     
+    // Perform the perspective divide (divide by W) ourselves
+    input.shadowMapPos /= input.shadowMapPos.w;
     
+    // Convert the normalized device coordinates to UVs for sampling
+    float2 shadowUV = input.shadowMapPos.xy * 0.5f + 0.5f;
+    shadowUV.y = 1 - shadowUV.y; // Flip the Y
+    
+    // Grab the distances we need: light-to-pixel and closest-surface
+    float distToLight = input.shadowMapPos.z;
+    float distShadowMap = ShadowMap.Sample(BasicSampler, shadowUV).r;
+    
+    // Get a ratio of comparison results using SampleCmpLevelZero()
+    float shadowAmount = ShadowMap.SampleCmpLevelZero(
+        ShadowSampler,
+        shadowUV,
+        distToLight).r;
+    shadowAmount = max(0.01f, shadowAmount);
     
 	// Always re-normalize interpolated direction vectors
     input.normal = normalize(input.normal);
@@ -73,7 +90,7 @@ float4 main(VertexToPixel input) : SV_TARGET
 	// Total color for this pixel
     float3 totalColor = float3(0, 0, 0);
 
-    totalColor += DirLight(worldLight, input.normal, input.worldPos, cameraPosition, specPower, surfaceColor.rgb);
+    totalColor += shadowAmount * DirLight(worldLight, input.normal, input.worldPos, cameraPosition, specPower, surfaceColor.rgb);
     totalColor = HeightFogColor(10.0f, 15.0f, -2.0f, -3.0f, cameraPosition, input.worldPos, totalColor, float3(0.2f, 0.2f, 0.25f));
     
 	// Gamma correction

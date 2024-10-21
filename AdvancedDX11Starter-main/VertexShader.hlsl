@@ -6,6 +6,8 @@ cbuffer externalData : register(b0)
 	matrix worldInverseTranspose;
 	matrix view;
 	matrix projection;
+    matrix lightView;
+    matrix lightProjection;
 };
 
 // Struct representing a single vertex worth of data
@@ -25,6 +27,7 @@ struct VertexToPixel
 	float3 normal			: NORMAL;
 	float3 tangent			: TANGENT;
 	float3 worldPos			: POSITION; // The world position of this vertex
+    float4 shadowMapPos		: SHADOW_POSITION;
 };
 
 // --------------------------------------------------------
@@ -49,6 +52,10 @@ VertexToPixel main(VertexShaderInput input)
 
 	// Pass the UV through
 	output.uv = input.uv;
+	
+	// Shadow map
+    matrix shadowWVP = mul(lightProjection, mul(lightView, world));
+    output.shadowMapPos = mul(shadowWVP, float4(input.position, 1.0f));
 
 	return output;
 }
