@@ -456,7 +456,11 @@ void Game::GenerateShadowData()
 	device->CreateTexture2D(&shadowDesc, 0, shadowTexture.GetAddressOf());
 
 
-	// Create the depth/stencil view
+	// NOTE: We are creating two views since we are rendering
+	//		 for the depth data along with creating an image. 
+
+	// Create the depth/stencil view that lets us access the 
+	// shadow texture 
 	D3D11_DEPTH_STENCIL_VIEW_DESC shadowDSDesc = {};
 	shadowDSDesc.Format = DXGI_FORMAT_D32_FLOAT;
 	shadowDSDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;

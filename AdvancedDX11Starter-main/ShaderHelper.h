@@ -81,7 +81,7 @@ static void SetCommonPixel(
 	// Set data specific to this shader 
 	ps->SetData("worldLight", &dirLight, sizeof(Light));
 	ps->SetFloat3("cameraPosition", camPos);
-	ps->CopyBufferData("perFrame"); 
+	ps->CopyBufferData("perFrame");
 
 	// Set shadowmap shader which is passed in
 	// every frame 
