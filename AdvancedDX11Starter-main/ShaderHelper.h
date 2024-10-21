@@ -42,6 +42,7 @@ static void SetVertexShader(
 	vs->CopyAllBufferData();
 }
 
+
 #pragma endregion
 
 #pragma region PIXEL_SHADERS

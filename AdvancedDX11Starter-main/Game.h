@@ -30,6 +30,7 @@ public:
 	void Init();
 	void OnResize();
 	void Update(float deltaTime, float totalTime);
+	void DrawShadowMap();
 	void Draw(float deltaTime, float totalTime);
 
 private:
@@ -58,16 +59,23 @@ private:
 	// Skybox
 	std::shared_ptr<Sky> sky;
 
-	// Shadow Resources 
+	// Shadow Mapping  
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> shadowDSV;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shadowSRV;
 	DirectX::XMFLOAT4X4 shadowViewMatrix;
 	DirectX::XMFLOAT4X4 shadowProjectionMatrix;
 
+	std::shared_ptr<SimpleVertexShader> shadowVS;
+
+	float shadowMapResolution;
+
+
 	// General helpers for setup and drawing
 	void LoadAssetsAndCreateEntities();
 	void GenerateLights();
+	void GenerateShadowData();
 	void DrawPointLights();
+	void OnWorldLightChange(); 
 
 	// UI functions
 	void UINewFrame(float deltaTime);

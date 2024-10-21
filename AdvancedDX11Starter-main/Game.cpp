@@ -55,6 +55,7 @@ Game::Game(HINSTANCE hInstance)
 	srand((unsigned int)time(0));
 
 	playersData = std::make_shared<PlayersData>();
+	shadowMapResolution = 1024; 
 
 
 #if defined(DEBUG) || defined(_DEBUG)
@@ -110,6 +111,10 @@ void Game::Init()
 	// Set up lights initially
 	lightCount = 64;
 	GenerateLights();
+	OnWorldLightChange();
+
+	// Set up shadow map resources 
+	GenerateShadowData();
 
 	// Set initial graphics API state
 	//  - These settings persist until we change them
@@ -141,6 +146,8 @@ void Game::LoadAssetsAndCreateEntities()
 	
 	std::shared_ptr<SimpleVertexShader> skyVS = LoadShader(SimpleVertexShader, L"SkyVS.cso");
 	std::shared_ptr<SimplePixelShader> skyPS  = LoadShader(SimplePixelShader, L"SkyPS.cso");
+
+	shadowVS = LoadShader(SimpleVertexShader, L"ShadowVertex.cso");
 
 	// Make the meshes
 	std::shared_ptr<Mesh> sphereMesh = std::make_shared<Mesh>(FixPath(L"../../Assets/Models/sphere.obj").c_str(), device);
@@ -352,11 +359,11 @@ void Game::LoadAssetsAndCreateEntities()
 	cubeB->GetTransform()->SetScale(1.5f);
 
 
-	entities.push_back(leftWall);
+	/*entities.push_back(leftWall);
 	entities.push_back(rightWall);
-	entities.push_back(backWall);
+	entities.push_back(backWall);*/
 	entities.push_back(floor);
-	entities.push_back(roof);
+	//entities.push_back(roof);
 	entities.push_back(cubeA);
 	entities.push_back(cubeB);
 
@@ -427,6 +434,50 @@ void Game::GenerateLights()
 
 }
 
+// --------------------------------------------------------
+// Sets up the resources necessary for shadow mapping 
+// --------------------------------------------------------
+void Game::GenerateShadowData()
+{
+	// Create the actual texture that will be the shadow map
+	D3D11_TEXTURE2D_DESC shadowDesc = {};
+	shadowDesc.Width = shadowMapResolution; // Ideally a power of 2 (like 1024)
+	shadowDesc.Height = shadowMapResolution; // Ideally a power of 2 (like 1024)
+	shadowDesc.ArraySize = 1;
+	shadowDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+	shadowDesc.CPUAccessFlags = 0;
+	shadowDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+	shadowDesc.MipLevels = 1;
+	shadowDesc.MiscFlags = 0;
+	shadowDesc.SampleDesc.Count = 1;
+	shadowDesc.SampleDesc.Quality = 0;
+	shadowDesc.Usage = D3D11_USAGE_DEFAULT;
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> shadowTexture;
+	device->CreateTexture2D(&shadowDesc, 0, shadowTexture.GetAddressOf());
+
+
+	// Create the depth/stencil view
+	D3D11_DEPTH_STENCIL_VIEW_DESC shadowDSDesc = {};
+	shadowDSDesc.Format = DXGI_FORMAT_D32_FLOAT;
+	shadowDSDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	shadowDSDesc.Texture2D.MipSlice = 0;
+	device->CreateDepthStencilView(
+		shadowTexture.Get(),
+		&shadowDSDesc,
+		shadowDSV.GetAddressOf());
+
+	// Create the SRV for the shadow map
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MipLevels = 1;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	device->CreateShaderResourceView(
+		shadowTexture.Get(),
+		&srvDesc,
+		shadowSRV.GetAddressOf());
+}
+
 
 
 // --------------------------------------------------------
@@ -487,10 +538,64 @@ void Game::Update(float deltaTime, float totalTime)
 }
 
 // --------------------------------------------------------
+// Before rendering the main primary entities go through 
+// and draw the shadow depths for sampling later 
+// --------------------------------------------------------
+void Game::DrawShadowMap()
+{
+	// Clear shadow map 
+	context->ClearDepthStencilView(shadowDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+	// Set up shadow depth target. We do not need
+	// a color output so null for render target
+	ID3D11RenderTargetView* nullRTV{};
+	context->OMSetRenderTargets(1, &nullRTV, shadowDSV.Get()); 
+
+	// Unbind pixel shader 
+	context->PSSetShader(0, 0, 0);
+
+	// Adjust viewport to match shadow map resolution 
+	D3D11_VIEWPORT viewport = {};
+	viewport.Width = (float)shadowMapResolution;
+	viewport.Height = (float)shadowMapResolution;
+	viewport.MaxDepth = 1.0f;
+	context->RSSetViewports(1, &viewport);
+
+
+	// Draw all entities to shadow map 
+	shadowVS->SetShader();
+	shadowVS->SetMatrix4x4("view", shadowViewMatrix);
+	shadowVS->SetMatrix4x4("projection", shadowProjectionMatrix);
+	// Loop and draw all entities
+	for (auto& e : entities)
+	{
+		shadowVS->SetMatrix4x4("world", e->GetTransform()->GetWorldMatrix());
+		shadowVS->CopyAllBufferData();
+
+
+		// Draw the mesh directly to avoid the entity's material
+		// Note: Your code may differ significantly here!
+		e->GetMesh()->SetBuffersAndDraw(context);
+	}
+
+
+	// Reset pipeline
+	viewport.Width = (float)this->windowWidth;
+	viewport.Height = (float)this->windowHeight;
+	context->RSSetViewports(1, &viewport);
+	context->OMSetRenderTargets(
+		1,
+		backBufferRTV.GetAddressOf(),
+		depthBufferDSV.Get());
+}
+
+// --------------------------------------------------------
 // Clear the screen, redraw everything, present to the user
 // --------------------------------------------------------
 void Game::Draw(float deltaTime, float totalTime)
 {
+	DrawShadowMap();
+
 	// Frame START
 	// - These things should happen ONCE PER FRAME
 	// - At the beginning of Game::Draw() before drawing *anything*
@@ -631,6 +736,30 @@ void Game::DrawPointLights()
 
 }
 
+/// <summary>
+/// Regenerate the light view matrix and other directional
+/// light data   
+/// </summary>
+void Game::OnWorldLightChange()
+{
+	XMFLOAT3 mainLightDir = lights[0].Direction;
+	XMVECTOR loadedDir = XMLoadFloat3(&mainLightDir);
+
+	XMMATRIX lightView = XMMatrixLookToLH(
+		-loadedDir * 20, // Position: "Backing up" 20 units from origin
+		loadedDir, // Direction: light's direction
+		XMVectorSet(0, 1, 0, 0)); // Up: World up vector (Y axis)
+
+	float lightProjectionSize = 15.0f; // Tweak for your scene!
+	XMMATRIX lightProjection = XMMatrixOrthographicLH(
+		lightProjectionSize,
+		lightProjectionSize,
+		1.0f,
+		100.0f);
+
+	XMStoreFloat4x4(&shadowViewMatrix, lightView);
+	XMStoreFloat4x4(&shadowProjectionMatrix, lightProjection);
+}
 
 
 // --------------------------------------------------------
@@ -669,11 +798,19 @@ void Game::UINewFrame(float deltaTime)
 // --------------------------------------------------------
 void Game::BuildUI()
 {
+
 	// Should we show the built-in demo window?
 	if (showUIDemoWindow)
 	{
 		ImGui::ShowDemoWindow();
 	}
+
+	// Shadow map GUI
+	ImGui::Begin("Shadow map");
+	{
+		ImGui::Image(shadowSRV.Get(), ImVec2(512, 512));
+	}
+	ImGui::End();
 
 	// Actually build our custom UI, starting with a window
 	ImGui::Begin("Inspector");
