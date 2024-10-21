@@ -58,6 +58,12 @@ private:
 	// Skybox
 	std::shared_ptr<Sky> sky;
 
+	// Shadow Resources 
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> shadowDSV;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shadowSRV;
+	DirectX::XMFLOAT4X4 shadowViewMatrix;
+	DirectX::XMFLOAT4X4 shadowProjectionMatrix;
+
 	// General helpers for setup and drawing
 	void LoadAssetsAndCreateEntities();
 	void GenerateLights();

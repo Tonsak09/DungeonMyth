@@ -278,7 +278,7 @@ void Game::LoadAssetsAndCreateEntities()
 
 
 	// Create the non-PBR entities ==============================
-	std::shared_ptr<GameEntity> cobSphere = std::make_shared<GameEntity>(sphereMesh, cobbleMat2x);
+	/*std::shared_ptr<GameEntity> cobSphere = std::make_shared<GameEntity>(sphereMesh, cobbleMat2x);
 	cobSphere->GetTransform()->SetPosition(-6, 4, 0);
 	cobSphere->GetTransform()->SetScale(2, 2, 2);
 
@@ -311,10 +311,57 @@ void Game::LoadAssetsAndCreateEntities()
 	sampleLv->GetTransform()->SetScale(1, 1, 1);
 
 	std::shared_ptr<GameEntity> skellyEnt = std::make_shared<GameEntity>(skelly, roughMat);
-	skellyEnt->GetTransform()->Rotate(25, -2.5, 0);
+	skellyEnt->GetTransform()->Rotate(25, -2.5, 0);*/
 
 
-	entities.push_back(cobSphere);
+	// Generate Cornell-like cube 
+	float yOffset = 1.0f;
+
+	std::shared_ptr<GameEntity> leftWall = std::make_shared<GameEntity>(planeMesh, cobbleMat2x);
+	leftWall->GetTransform()->SetPosition(-2, yOffset, 0);
+	leftWall->GetTransform()->Rotate(0.0f, 0.0f, -XM_PI / 2.0f);
+	leftWall->GetTransform()->SetScale(2.0f);
+
+	std::shared_ptr<GameEntity> rightWall = std::make_shared<GameEntity>(planeMesh, cobbleMat2x);
+	rightWall->GetTransform()->SetPosition(2, yOffset, 0);
+	rightWall->GetTransform()->Rotate(-XM_PI / 2.0f, 0.0f, XM_PI / 2.0f);
+	rightWall->GetTransform()->SetScale(2.0f);
+	
+	std::shared_ptr<GameEntity> backWall = std::make_shared<GameEntity>(planeMesh, cobbleMat2x);
+	backWall->GetTransform()->SetPosition(0.0f, yOffset, 2.0f);
+	backWall->GetTransform()->Rotate(-XM_PI / 2.0f, 0.0f, 0.0f);
+	backWall->GetTransform()->SetScale(2.0f);
+
+	std::shared_ptr<GameEntity> floor = std::make_shared<GameEntity>(planeMesh, roughMat);
+	floor->GetTransform()->SetPosition(0.0f, -2.0f + yOffset, 0.0f);
+	floor->GetTransform()->SetScale(2.0f);
+
+	std::shared_ptr<GameEntity> roof = std::make_shared<GameEntity>(planeMesh, roughMat);
+	roof->GetTransform()->SetPosition(0.0f, 2.0f + yOffset, 0.0f);
+	roof->GetTransform()->Rotate(0.0f, 0.0f, XM_PI);
+	roof->GetTransform()->SetScale(2.0f);
+
+	std::shared_ptr<GameEntity> cubeA = std::make_shared<GameEntity>(cubeMesh, paintMat);
+	cubeA->GetTransform()->SetPosition(1.0f, -1.5f + yOffset, 0.0f);
+	cubeA->GetTransform()->Rotate(0.0f, XM_PI / 4.0f, 0.0f);
+	cubeA->GetTransform()->SetScale(1.0f);
+
+	std::shared_ptr<GameEntity> cubeB = std::make_shared<GameEntity>(cubeMesh, bronzeMat);
+	cubeB->GetTransform()->SetPosition(-1.0f, -1.25f + yOffset, 0.0f);
+	cubeB->GetTransform()->Rotate(0.0f, 0.0f, 0.0f);
+	cubeB->GetTransform()->SetScale(1.5f);
+
+
+	entities.push_back(leftWall);
+	entities.push_back(rightWall);
+	entities.push_back(backWall);
+	entities.push_back(floor);
+	entities.push_back(roof);
+	entities.push_back(cubeA);
+	entities.push_back(cubeB);
+
+
+	/*entities.push_back(cobSphere);
 	entities.push_back(floorSphere);
 	entities.push_back(paintSphere);
 	entities.push_back(scratchSphere);
@@ -322,8 +369,7 @@ void Game::LoadAssetsAndCreateEntities()
 	entities.push_back(roughSphere);
 	entities.push_back(woodSphere);
 	entities.push_back(sampleLv);
-	entities.push_back(skellyEnt);
-
+	entities.push_back(skellyEnt);*/
 
 	// Save assets needed for drawing point lights
 	lightMesh = sphereMesh;
@@ -458,7 +504,6 @@ void Game::Draw(float deltaTime, float totalTime)
 	}
 
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
 
 
 	// Set buffer data specifically for the CommonPixel shader 
