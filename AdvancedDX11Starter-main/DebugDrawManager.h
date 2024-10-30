@@ -65,7 +65,7 @@ struct DebugDrawData
 			FixPath(L"../../Assets/Models/sphere.obj").c_str(), device);
 
 		debugMat = std::make_shared<Material>(
-			solidColorPS, vertexShader, DirectX::XMFLOAT3(1, 1, 1), DirectX::XMFLOAT2(2, 2));
+			DirectX::XMFLOAT3(1, 1, 1), DirectX::XMFLOAT2(2, 2));
 		debugMeshes.push_back(sphereMesh);
 		debugMeshes.push_back(sphereMesh);
 		debugMeshes.push_back(sphereMesh);

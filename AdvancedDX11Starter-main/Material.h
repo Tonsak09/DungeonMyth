@@ -14,22 +14,22 @@ class Material
 {
 public:
 	Material(
-		std::shared_ptr<SimplePixelShader> ps, 
-		std::shared_ptr<SimpleVertexShader> vs, 
+		//std::shared_ptr<SimplePixelShader> ps, 
+		//std::shared_ptr<SimpleVertexShader> vs, 
 		DirectX::XMFLOAT3 tint, 
 		DirectX::XMFLOAT2 uvScale = DirectX::XMFLOAT2(1, 1),
 		DirectX::XMFLOAT2 uvOffset = DirectX::XMFLOAT2(0, 0));
 
-	std::shared_ptr<SimplePixelShader> GetPixelShader();
-	std::shared_ptr<SimpleVertexShader> GetVertexShader();
+	//std::shared_ptr<SimplePixelShader> GetPixelShader();
+	//std::shared_ptr<SimpleVertexShader> GetVertexShader();
 	DirectX::XMFLOAT2 GetUVScale();
 	DirectX::XMFLOAT2 GetUVOffset();
 	DirectX::XMFLOAT3 GetColorTint();
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetTextureSRV(std::string name);
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> GetSampler(std::string name);
 
-	void SetPixelShader(std::shared_ptr<SimplePixelShader> ps);
-	void SetVertexShader(std::shared_ptr<SimpleVertexShader> ps);
+	//void SetPixelShader(std::shared_ptr<SimplePixelShader> ps);
+	//void SetVertexShader(std::shared_ptr<SimpleVertexShader> ps);
 	void SetUVScale(DirectX::XMFLOAT2 scale);
 	void SetUVOffset(DirectX::XMFLOAT2 offset);
 	void SetColorTint(DirectX::XMFLOAT3 tint);
@@ -40,17 +40,17 @@ public:
 	void RemoveTextureSRV(std::string name);
 	void RemoveSampler(std::string name);
 
-	void PrepareMaterial();
+	//void PrepareMaterial();
 	void PrepareMaterial(std::shared_ptr<SimplePixelShader> inPS);
-	void PrepareMaterial(Transform* transform, std::shared_ptr<FreeCamera> camera);
-	void PrepareMaterial(Transform* transform, Camera* camera);
+	//void PrepareMaterial(Transform* transform, std::shared_ptr<FreeCamera> camera);
+	//void PrepareMaterial(Transform* transform, Camera* camera);
 
 
 private:
 
 	// Shaders
-	std::shared_ptr<SimplePixelShader> ps;
-	std::shared_ptr<SimpleVertexShader> vs;
+	//std::shared_ptr<SimplePixelShader> ps;
+	//std::shared_ptr<SimpleVertexShader> vs;
 	
 	// Material properties
 	DirectX::XMFLOAT3 colorTint;

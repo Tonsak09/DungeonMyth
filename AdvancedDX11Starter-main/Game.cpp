@@ -157,6 +157,7 @@ void Game::LoadAssetsAndCreateEntities()
 {
 	AddVS(L"VertexShader.cso");
 	AddPS(L"PixelCommon.cso");
+	AddPS(L"SolidColorPS");
 
 	// Load shaders using our succinct LoadShader() macro
 	std::shared_ptr<SimpleVertexShader> vertexShader	= LoadShader(SimpleVertexShader, L"VertexShader.cso");
@@ -250,53 +251,53 @@ void Game::LoadAssetsAndCreateEntities()
 		context);
 
 	// Solid Mat 
-	std::shared_ptr<Material> solidMat = std::make_shared<Material>(solidGreyPS, vertexShader, XMFLOAT3(1, 1, 1), XMFLOAT2(2, 2));
+	std::shared_ptr<Material> solidMat = std::make_shared<Material>( XMFLOAT3(1, 1, 1), XMFLOAT2(2, 2));
 
 
 	// Create non-PBR materials
-	std::shared_ptr<Material> cobbleMat2x = std::make_shared<Material>(pixelShader, vertexShader, XMFLOAT3(1, 1, 1), XMFLOAT2(2, 2));
+	std::shared_ptr<Material> cobbleMat2x = std::make_shared<Material>(XMFLOAT3(1, 1, 1), XMFLOAT2(2, 2));
 	cobbleMat2x->AddSampler("BasicSampler", samplerOptions);
 	cobbleMat2x->AddTextureSRV("Albedo", cobbleA);
 	cobbleMat2x->AddTextureSRV("NormalMap", cobbleN);
 	cobbleMat2x->AddTextureSRV("RoughnessMap", cobbleR);
 
-	std::shared_ptr<Material> cobbleMat4x = std::make_shared<Material>(pixelShader, vertexShader, XMFLOAT3(1, 1, 1), XMFLOAT2(4, 4));
+	std::shared_ptr<Material> cobbleMat4x = std::make_shared<Material>(XMFLOAT3(1, 1, 1), XMFLOAT2(4, 4));
 	cobbleMat4x->AddSampler("BasicSampler", samplerOptions);
 	cobbleMat4x->AddTextureSRV("Albedo", cobbleA);
 	cobbleMat4x->AddTextureSRV("NormalMap", cobbleN);
 	cobbleMat4x->AddTextureSRV("RoughnessMap", cobbleR);
 
-	std::shared_ptr<Material> floorMat = std::make_shared<Material>(pixelShader, vertexShader, XMFLOAT3(1, 1, 1), XMFLOAT2(2, 2));
+	std::shared_ptr<Material> floorMat = std::make_shared<Material>(XMFLOAT3(1, 1, 1), XMFLOAT2(2, 2));
 	floorMat->AddSampler("BasicSampler", samplerOptions);
 	floorMat->AddTextureSRV("Albedo", floorA);
 	floorMat->AddTextureSRV("NormalMap", floorN);
 	floorMat->AddTextureSRV("RoughnessMap", floorR);
 
-	std::shared_ptr<Material> paintMat = std::make_shared<Material>(pixelShader, vertexShader, XMFLOAT3(1, 1, 1), XMFLOAT2(2, 2));
+	std::shared_ptr<Material> paintMat = std::make_shared<Material>(XMFLOAT3(1, 1, 1), XMFLOAT2(2, 2));
 	paintMat->AddSampler("BasicSampler", samplerOptions);
 	paintMat->AddTextureSRV("Albedo", paintA);
 	paintMat->AddTextureSRV("NormalMap", paintN);
 	paintMat->AddTextureSRV("RoughnessMap", paintR);
 
-	std::shared_ptr<Material> scratchedMat = std::make_shared<Material>(pixelShader, vertexShader, XMFLOAT3(1, 1, 1), XMFLOAT2(2, 2));
+	std::shared_ptr<Material> scratchedMat = std::make_shared<Material>(XMFLOAT3(1, 1, 1), XMFLOAT2(2, 2));
 	scratchedMat->AddSampler("BasicSampler", samplerOptions);
 	scratchedMat->AddTextureSRV("Albedo", scratchedA);
 	scratchedMat->AddTextureSRV("NormalMap", scratchedN);
 	scratchedMat->AddTextureSRV("RoughnessMap", scratchedR);
 
-	std::shared_ptr<Material> bronzeMat = std::make_shared<Material>(pixelShader, vertexShader, XMFLOAT3(1, 1, 1), XMFLOAT2(2, 2));
+	std::shared_ptr<Material> bronzeMat = std::make_shared<Material>(XMFLOAT3(1, 1, 1), XMFLOAT2(2, 2));
 	bronzeMat->AddSampler("BasicSampler", samplerOptions);
 	bronzeMat->AddTextureSRV("Albedo", bronzeA);
 	bronzeMat->AddTextureSRV("NormalMap", bronzeN);
 	bronzeMat->AddTextureSRV("RoughnessMap", bronzeR);
 
-	std::shared_ptr<Material> roughMat = std::make_shared<Material>(pixelShader, vertexShader, XMFLOAT3(1, 1, 1), XMFLOAT2(2, 2));
+	std::shared_ptr<Material> roughMat = std::make_shared<Material>(XMFLOAT3(1, 1, 1), XMFLOAT2(2, 2));
 	roughMat->AddSampler("BasicSampler", samplerOptions);
 	roughMat->AddTextureSRV("Albedo", roughA);
 	roughMat->AddTextureSRV("NormalMap", roughN);
 	roughMat->AddTextureSRV("RoughnessMap", roughR);
 
-	std::shared_ptr<Material> woodMat = std::make_shared<Material>(pixelShader, vertexShader, XMFLOAT3(1, 1, 1), XMFLOAT2(2, 2));
+	std::shared_ptr<Material> woodMat = std::make_shared<Material>(XMFLOAT3(1, 1, 1), XMFLOAT2(2, 2));
 	woodMat->AddSampler("BasicSampler", samplerOptions);
 	woodMat->AddTextureSRV("Albedo", woodA);
 	woodMat->AddTextureSRV("NormalMap", woodN);
@@ -635,8 +636,6 @@ void Game::DrawShadowMap()
 		1,
 		backBufferRTV.GetAddressOf(),
 		depthBufferDSV.Get());
-
-	
 }
 
 // --------------------------------------------------------
@@ -692,12 +691,12 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	for (auto& ge : debugDrawData.drawGroup)
 	{
-		std::shared_ptr<SimplePixelShader> ps = ge.entity->GetMaterial()->GetPixelShader();
+		std::shared_ptr<SimplePixelShader> ps = nameToPS[L"SolidColorPS.cso"]; //ge.entity->GetMaterial()->GetPixelShader();
 		ps->SetFloat3("Color", ge.color);
 		ps->CopyBufferData("perFrame");
 
 		// Draw the entity
-		ge.entity->Draw(context, &playersData->cams[0]);
+		ge.entity->Draw(context, ps, &playersData->cams[0]);
 	}
 #endif
 
