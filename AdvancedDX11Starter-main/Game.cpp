@@ -132,12 +132,32 @@ void Game::Init()
 	playersData->transforms[0].SetPosition(0.0f, 0.0f, -10.0f);
 }
 
+void Game::AddVS(const wchar_t* name)
+{
+	std::shared_ptr<SimpleVertexShader> vertexShader = 
+		LoadShader(SimpleVertexShader, name);
+	
+	nameToVS.insert(std::pair<const wchar_t*, std::shared_ptr<SimpleVertexShader>>(
+		name, vertexShader));
+}
+
+void Game::AddPS(const wchar_t* name)
+{
+	std::shared_ptr<SimplePixelShader> pixelShader =
+		LoadShader(SimplePixelShader, name);
+
+	nameToPS.insert(std::pair<const wchar_t*, std::shared_ptr<SimplePixelShader>>(
+		name, pixelShader));
+}
 
 // --------------------------------------------------------
 // Load all assets and create materials, entities, etc.
 // --------------------------------------------------------
 void Game::LoadAssetsAndCreateEntities()
 {
+	AddVS(L"VertexShader.cso");
+	AddPS(L"PixelCommon.cso");
+
 	// Load shaders using our succinct LoadShader() macro
 	std::shared_ptr<SimpleVertexShader> vertexShader	= LoadShader(SimpleVertexShader, L"VertexShader.cso");
 	std::shared_ptr<SimplePixelShader> pixelShader		= LoadShader(SimplePixelShader, L"PixelCommon.cso"); // From pixelshader -> pixelcommon 
@@ -644,6 +664,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	// Set buffer data specifically for the CommonPixel shader 
 	SetCommonPixel(
 		entities[0]->GetMaterial(),
+		nameToPS[L"PixelCommon.cso"],
 		lights[0],
 		playersData->cams[0].transform.GetPosition(),
 		shadowSRV, shadowSampler);
@@ -653,14 +674,15 @@ void Game::Draw(float deltaTime, float totalTime)
 	{
 		// Vertex data is updated per entity 
 		SetVertexShader(
-			ge->GetMaterial()->GetVertexShader(),
+			/*ge->GetMaterial()->GetVertexShader()*/
+			nameToVS[L"VertexShader.cso"],
 			ge->GetTransform(),
 			&playersData->cams[0], 
 			shadowViewMatrix,
 			shadowProjectionMatrix);
 		
 		// Draw the entity
-		ge->Draw(context, &playersData->cams[0]);
+		ge->Draw(context, nameToPS[L"PixelCommon.cso"], &playersData->cams[0]);
 	}
 
 

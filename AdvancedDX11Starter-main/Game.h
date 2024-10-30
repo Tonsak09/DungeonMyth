@@ -11,6 +11,7 @@
 #include <DirectXMath.h>
 #include <wrl/client.h>
 #include <vector>
+#include <map>
 
 #include "Player.h"
 
@@ -53,6 +54,12 @@ private:
 	std::shared_ptr<SimpleVertexShader> lightVS;
 	std::shared_ptr<SimplePixelShader> lightPS;
 
+	// Shaders 
+	std::map<const wchar_t*, std::shared_ptr<SimpleVertexShader>> nameToVS;
+	std::map<const wchar_t*, std::shared_ptr<SimplePixelShader>> nameToPS;
+	void AddVS(const wchar_t* name);
+	void AddPS(const wchar_t* name);
+
 	// Texture related resources
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerOptions;
 
@@ -85,7 +92,7 @@ private:
 	void UINewFrame(float deltaTime);
 	void BuildUI();
 	void CameraUI(std::shared_ptr<FreeCamera> cam);
-	void EntityUI(std::shared_ptr<GameEntity> entity);	
+	void EntityUI(std::shared_ptr<GameEntity> entity);
 	void LightUI(Light& light);
 	
 	// Should the ImGui demo window be shown?

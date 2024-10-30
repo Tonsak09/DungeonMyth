@@ -41,8 +41,10 @@ public:
 	void RemoveSampler(std::string name);
 
 	void PrepareMaterial();
+	void PrepareMaterial(std::shared_ptr<SimplePixelShader> inPS);
 	void PrepareMaterial(Transform* transform, std::shared_ptr<FreeCamera> camera);
 	void PrepareMaterial(Transform* transform, Camera* camera);
+
 
 private:
 

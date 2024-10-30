@@ -69,13 +69,14 @@ static void SetMateralPixelData(
 /// </summary>
 static void SetCommonPixel(
 	std::shared_ptr<Material> material,
+	std::shared_ptr<SimplePixelShader> ps,
 	Light dirLight,
 	DirectX::XMFLOAT3 camPos,
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shadowSRV,
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> shadowSampler)
 {
 	// Common pixel shader from material 
-	std::shared_ptr<SimplePixelShader> ps = material->GetPixelShader();
+	//std::shared_ptr<SimplePixelShader> ps = material->GetPixelShader();
 	ps->SetShader();
 
 	// Set data specific to this shader 

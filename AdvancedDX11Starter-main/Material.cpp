@@ -138,3 +138,10 @@ void Material::PrepareMaterial()
 	for (auto& t : textureSRVs) { ps->SetShaderResourceView(t.first.c_str(), t.second.Get()); }
 	for (auto& s : samplers) { ps->SetSamplerState(s.first.c_str(), s.second.Get()); }
 }
+
+void Material::PrepareMaterial(std::shared_ptr<SimplePixelShader> inPS)
+{
+	// Loop and set any other resources
+	for (auto& t : textureSRVs) { inPS->SetShaderResourceView(t.first.c_str(), t.second.Get()); }
+	for (auto& s : samplers) { inPS->SetSamplerState(s.first.c_str(), s.second.Get()); }
+}
