@@ -69,68 +69,6 @@ void Material::RemoveSampler(std::string name)
 	samplers.erase(name);
 }
 
-
-//void Material::PrepareMaterial(Transform* transform, std::shared_ptr<FreeCamera> camera)
-//{
-//	// Turn on these shaders
-//	vs->SetShader();
-//	ps->SetShader();
-//
-//	// Send data to the vertex shader
-//	vs->SetMatrix4x4("world", transform->GetWorldMatrix());
-//	vs->SetMatrix4x4("worldInverseTranspose", transform->GetWorldInverseTransposeMatrix());
-//	vs->SetMatrix4x4("view", camera->GetView());
-//	vs->SetMatrix4x4("projection", camera->GetProjection());
-//	vs->CopyAllBufferData();
-//
-//	// Send data to the pixel shader
-//	ps->SetFloat3("colorTint", colorTint);
-//	ps->SetFloat3("cameraPosition", camera->GetTransform()->GetPosition());
-//	ps->SetFloat2("uvScale", uvScale);
-//	ps->SetFloat2("uvOffset", uvOffset);
-//	ps->CopyAllBufferData();
-//
-//	// Loop and set any other resources
-//	for (auto& t : textureSRVs) { ps->SetShaderResourceView(t.first.c_str(), t.second.Get()); }
-//	for (auto& s : samplers) { ps->SetSamplerState(s.first.c_str(), s.second.Get()); }
-//}
-
-//void Material::PrepareMaterial(Transform* transform, Camera* camera)
-//{
-//	// Turn on these shaders
-//	vs->SetShader();
-//	ps->SetShader();
-//
-//	// Send data to the vertex shader
-//	vs->SetMatrix4x4("world", transform->GetWorldMatrix());
-//	vs->SetMatrix4x4("worldInverseTranspose", transform->GetWorldInverseTransposeMatrix());
-//	vs->SetMatrix4x4("view", camera->viewMatrix);
-//	vs->SetMatrix4x4("projection", camera->projMatrix);
-//	vs->CopyAllBufferData();
-//
-//	// Send data to the pixel shader
-//	ps->SetFloat3("colorTint", colorTint);
-//	ps->SetFloat3("cameraPosition", camera->transform.GetPosition());
-//	ps->SetFloat2("uvScale", uvScale);
-//	ps->SetFloat2("uvOffset", uvOffset);
-//	ps->CopyAllBufferData();
-//
-//	// Loop and set any other resources
-//	for (auto& t : textureSRVs) { ps->SetShaderResourceView(t.first.c_str(), t.second.Get()); }
-//	for (auto& s : samplers) { ps->SetSamplerState(s.first.c_str(), s.second.Get()); }
-//}
-
-/// <summary>
-/// Prepares all textures and samplers connected
-/// to this material 
-/// </summary>
-//void Material::PrepareMaterial()
-//{
-//	// Loop and set any other resources
-//	for (auto& t : textureSRVs) { ps->SetShaderResourceView(t.first.c_str(), t.second.Get()); }
-//	for (auto& s : samplers) { ps->SetSamplerState(s.first.c_str(), s.second.Get()); }
-//}
-
 void Material::PrepareMaterial(std::shared_ptr<SimplePixelShader> inPS)
 {
 	// Loop and set any other resources
