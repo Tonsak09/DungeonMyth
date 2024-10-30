@@ -40,18 +40,11 @@ public:
 	void RemoveTextureSRV(std::string name);
 	void RemoveSampler(std::string name);
 
-	//void PrepareMaterial();
 	void PrepareMaterial(std::shared_ptr<SimplePixelShader> inPS);
-	//void PrepareMaterial(Transform* transform, std::shared_ptr<FreeCamera> camera);
-	//void PrepareMaterial(Transform* transform, Camera* camera);
 
 
 private:
 
-	// Shaders
-	//std::shared_ptr<SimplePixelShader> ps;
-	//std::shared_ptr<SimpleVertexShader> vs;
-	
 	// Material properties
 	DirectX::XMFLOAT3 colorTint;
 

@@ -155,20 +155,23 @@ void Game::AddPS(const wchar_t* name)
 // --------------------------------------------------------
 void Game::LoadAssetsAndCreateEntities()
 {
+	
+
+	// Load shaders using our succinct LoadShader() macro
+	//std::shared_ptr<SimpleVertexShader> vertexShader	= LoadShader(SimpleVertexShader, L"VertexShader.cso");
+	//std::shared_ptr<SimplePixelShader> pixelShader		= LoadShader(SimplePixelShader, L"PixelCommon.cso"); // From pixelshader -> pixelcommon 
+	//std::shared_ptr<SimplePixelShader> solidColorPS		= LoadShader(SimplePixelShader, L"SolidColorPS.cso");
+	//std::shared_ptr<SimplePixelShader> solidGreyPS		= LoadShader(SimplePixelShader, L"SolidGrey.cso");
+	
+	// Load active shaders 
 	AddVS(L"VertexShader.cso");
+	AddVS(L"ShadowVertex.cso");
 	AddPS(L"PixelCommon.cso");
 	AddPS(L"SolidColorPS");
 
-	// Load shaders using our succinct LoadShader() macro
-	std::shared_ptr<SimpleVertexShader> vertexShader	= LoadShader(SimpleVertexShader, L"VertexShader.cso");
-	std::shared_ptr<SimplePixelShader> pixelShader		= LoadShader(SimplePixelShader, L"PixelCommon.cso"); // From pixelshader -> pixelcommon 
-	std::shared_ptr<SimplePixelShader> solidColorPS		= LoadShader(SimplePixelShader, L"SolidColorPS.cso");
-	std::shared_ptr<SimplePixelShader> solidGreyPS		= LoadShader(SimplePixelShader, L"SolidGrey.cso");
-	
+	// Shaders only needed here 
 	std::shared_ptr<SimpleVertexShader> skyVS = LoadShader(SimpleVertexShader, L"SkyVS.cso");
 	std::shared_ptr<SimplePixelShader> skyPS  = LoadShader(SimplePixelShader, L"SkyPS.cso");
-
-	shadowVS = LoadShader(SimpleVertexShader, L"ShadowVertex.cso");
 
 	// Make the meshes
 	std::shared_ptr<Mesh> sphereMesh = std::make_shared<Mesh>(FixPath(L"../../Assets/Models/sphere.obj").c_str(), device);
@@ -306,41 +309,6 @@ void Game::LoadAssetsAndCreateEntities()
 
 
 	// Create the non-PBR entities ==============================
-	/*std::shared_ptr<GameEntity> cobSphere = std::make_shared<GameEntity>(sphereMesh, cobbleMat2x);
-	cobSphere->GetTransform()->SetPosition(-6, 4, 0);
-	cobSphere->GetTransform()->SetScale(2, 2, 2);
-
-	std::shared_ptr<GameEntity> floorSphere = std::make_shared<GameEntity>(sphereMesh, floorMat);
-	floorSphere->GetTransform()->SetPosition(-4, 4, 0);
-	floorSphere->GetTransform()->SetScale(2, 2, 2);
-
-	std::shared_ptr<GameEntity> paintSphere = std::make_shared<GameEntity>(sphereMesh, paintMat);
-	paintSphere->GetTransform()->SetPosition(-2, 4, 0);
-	paintSphere->GetTransform()->SetScale(2, 2, 2);
-
-	std::shared_ptr<GameEntity> scratchSphere = std::make_shared<GameEntity>(sphereMesh, scratchedMat);
-	scratchSphere->GetTransform()->SetPosition(0, 4, 0);
-	scratchSphere->GetTransform()->SetScale(2, 2, 2);
-
-	std::shared_ptr<GameEntity> bronzeSphere = std::make_shared<GameEntity>(sphereMesh, bronzeMat);
-	bronzeSphere->GetTransform()->SetPosition(2, 4, 0);
-	bronzeSphere->GetTransform()->SetScale(2, 2, 2);
-
-	std::shared_ptr<GameEntity> roughSphere = std::make_shared<GameEntity>(sphereMesh, roughMat);
-	roughSphere->GetTransform()->SetPosition(4, 4, 0);
-	roughSphere->GetTransform()->SetScale(2, 2, 2);
-
-	std::shared_ptr<GameEntity> woodSphere = std::make_shared<GameEntity>(sphereMesh, woodMat);
-	woodSphere->GetTransform()->SetPosition(6, 4, 0);
-	woodSphere->GetTransform()->SetScale(2, 2, 2);
-
-	std::shared_ptr<GameEntity> sampleLv = std::make_shared<GameEntity>(sampleLevel, roughMat);
-	sampleLv->GetTransform()->SetPosition(0, -5, 0);
-	sampleLv->GetTransform()->SetScale(1, 1, 1);
-
-	std::shared_ptr<GameEntity> skellyEnt = std::make_shared<GameEntity>(skelly, roughMat);
-	skellyEnt->GetTransform()->Rotate(25, -2.5, 0);*/
-
 
 	// Generate Cornell-like cube 
 	float yOffset = 1.0f;
@@ -388,21 +356,10 @@ void Game::LoadAssetsAndCreateEntities()
 	entities.push_back(cubeA);
 	entities.push_back(cubeB);
 
-
-	/*entities.push_back(cobSphere);
-	entities.push_back(floorSphere);
-	entities.push_back(paintSphere);
-	entities.push_back(scratchSphere);
-	entities.push_back(bronzeSphere);
-	entities.push_back(roughSphere);
-	entities.push_back(woodSphere);
-	entities.push_back(sampleLv);
-	entities.push_back(skellyEnt);*/
-
 	// Save assets needed for drawing point lights
 	lightMesh = sphereMesh;
-	lightVS = vertexShader;
-	lightPS = solidColorPS;
+	lightVS = nameToVS[L"VertexShader.cso"];
+	lightPS = nameToPS[L"SolidColorPS.cso"];
 }
 
 
@@ -610,6 +567,7 @@ void Game::DrawShadowMap()
 
 
 	// Draw all entities to shadow map 
+	std::shared_ptr<SimpleVertexShader> shadowVS = nameToVS[L"ShadowVertex.cso"];
 	shadowVS->SetShader();
 	shadowVS->SetMatrix4x4("view", shadowViewMatrix);
 	shadowVS->SetMatrix4x4("projection", shadowProjectionMatrix);

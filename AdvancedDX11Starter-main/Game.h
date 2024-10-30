@@ -75,7 +75,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> shadowRasterizer;
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> shadowSampler;
 
-	std::shared_ptr<SimpleVertexShader> shadowVS;
 	const int SHADOW_MAP_RESOLUTION = 2048;
 
 	
