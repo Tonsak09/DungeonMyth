@@ -132,6 +132,10 @@ void Game::Init()
 	playersData->transforms[0].SetPosition(0.0f, 0.0f, -10.0f);
 }
 
+/// <summary>
+/// Stores a vertex shader into the game 
+/// </summary>
+/// <param name="name"></param>
 void Game::AddVS(const wchar_t* name)
 {
 	std::shared_ptr<SimpleVertexShader> vertexShader = 
@@ -141,6 +145,10 @@ void Game::AddVS(const wchar_t* name)
 		name, vertexShader));
 }
 
+/// <summary>
+/// Stores a pixel shader into the game 
+/// </summary>
+/// <param name="name"></param>
 void Game::AddPS(const wchar_t* name)
 {
 	std::shared_ptr<SimplePixelShader> pixelShader =
@@ -150,19 +158,25 @@ void Game::AddPS(const wchar_t* name)
 		name, pixelShader));
 }
 
+/// <summary>
+/// Adds a material into the game 
+/// </summary>
+/// <param name="mat"></param>
+/// <param name="matName"></param>
+void Game::AddMat(
+	std::shared_ptr<RendMat> mat,
+	const wchar_t* matName)
+{
+	nameToMat.insert(
+		std::pair<const wchar_t*, std::shared_ptr<RendMat>>(
+		matName, mat));
+}
+
 // --------------------------------------------------------
 // Load all assets and create materials, entities, etc.
 // --------------------------------------------------------
 void Game::LoadAssetsAndCreateEntities()
 {
-	
-
-	// Load shaders using our succinct LoadShader() macro
-	//std::shared_ptr<SimpleVertexShader> vertexShader	= LoadShader(SimpleVertexShader, L"VertexShader.cso");
-	//std::shared_ptr<SimplePixelShader> pixelShader		= LoadShader(SimplePixelShader, L"PixelCommon.cso"); // From pixelshader -> pixelcommon 
-	//std::shared_ptr<SimplePixelShader> solidColorPS		= LoadShader(SimplePixelShader, L"SolidColorPS.cso");
-	//std::shared_ptr<SimplePixelShader> solidGreyPS		= LoadShader(SimplePixelShader, L"SolidGrey.cso");
-	
 	// Load active shaders 
 	AddVS(L"VertexShader.cso");
 	AddVS(L"ShadowVertex.cso");
