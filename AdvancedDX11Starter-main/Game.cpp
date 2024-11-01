@@ -272,53 +272,74 @@ void Game::LoadAssetsAndCreateEntities()
 
 
 	// Create non-PBR materials
-	std::shared_ptr<Material> cobbleMat2x = std::make_shared<Material>(XMFLOAT3(1, 1, 1), XMFLOAT2(2, 2));
-	cobbleMat2x->AddSampler("BasicSampler", samplerOptions);
-	cobbleMat2x->AddTextureSRV("Albedo", cobbleA);
-	cobbleMat2x->AddTextureSRV("NormalMap", cobbleN);
-	cobbleMat2x->AddTextureSRV("RoughnessMap", cobbleR);
+	std::shared_ptr<RendMat> cobble2xRendMat = 
+		std::make_shared<RendMat>(
+			XMFLOAT3(1, 1, 1),
+			XMFLOAT2(0, 0),
+			XMFLOAT2(2, 2),
+			L"VertexShader.cso",
+			L"PixelCommon.cso"
+		);
+	AddSampler(cobble2xRendMat, "BasicSampler", samplerOptions);
+	AddTextureSRV(cobble2xRendMat, "Albedo", cobbleA);
+	AddTextureSRV(cobble2xRendMat, "NormalMap", cobbleN);
+	AddTextureSRV(cobble2xRendMat, "RoughnessMap", cobbleR);
 
-	std::shared_ptr<Material> cobbleMat4x = std::make_shared<Material>(XMFLOAT3(1, 1, 1), XMFLOAT2(4, 4));
-	cobbleMat4x->AddSampler("BasicSampler", samplerOptions);
-	cobbleMat4x->AddTextureSRV("Albedo", cobbleA);
-	cobbleMat4x->AddTextureSRV("NormalMap", cobbleN);
-	cobbleMat4x->AddTextureSRV("RoughnessMap", cobbleR);
 
-	std::shared_ptr<Material> floorMat = std::make_shared<Material>(XMFLOAT3(1, 1, 1), XMFLOAT2(2, 2));
-	floorMat->AddSampler("BasicSampler", samplerOptions);
-	floorMat->AddTextureSRV("Albedo", floorA);
-	floorMat->AddTextureSRV("NormalMap", floorN);
-	floorMat->AddTextureSRV("RoughnessMap", floorR);
+	std::shared_ptr<RendMat> paintRendMat =
+		std::make_shared<RendMat>(
+			XMFLOAT3(1, 1, 1),
+			XMFLOAT2(0, 0),
+			XMFLOAT2(2, 2),
+			L"VertexShader.cso",
+			L"PixelCommon.cso"
+		);
+	AddSampler(paintRendMat, "BasicSampler", samplerOptions);
+	AddTextureSRV(paintRendMat, "Albedo", paintA);
+	AddTextureSRV(paintRendMat, "NormalMap", paintN);
+	AddTextureSRV(paintRendMat, "RoughnessMap", paintR);
 
-	std::shared_ptr<Material> paintMat = std::make_shared<Material>(XMFLOAT3(1, 1, 1), XMFLOAT2(2, 2));
-	paintMat->AddSampler("BasicSampler", samplerOptions);
-	paintMat->AddTextureSRV("Albedo", paintA);
-	paintMat->AddTextureSRV("NormalMap", paintN);
-	paintMat->AddTextureSRV("RoughnessMap", paintR);
 
-	std::shared_ptr<Material> scratchedMat = std::make_shared<Material>(XMFLOAT3(1, 1, 1), XMFLOAT2(2, 2));
-	scratchedMat->AddSampler("BasicSampler", samplerOptions);
-	scratchedMat->AddTextureSRV("Albedo", scratchedA);
-	scratchedMat->AddTextureSRV("NormalMap", scratchedN);
-	scratchedMat->AddTextureSRV("RoughnessMap", scratchedR);
+	std::shared_ptr<RendMat> bronzeRendMat =
+		std::make_shared<RendMat>(
+			XMFLOAT3(1, 1, 1),
+			XMFLOAT2(0, 0),
+			XMFLOAT2(2, 2),
+			L"VertexShader.cso",
+			L"PixelCommon.cso"
+		);
+	AddSampler(bronzeRendMat, "BasicSampler", samplerOptions);
+	AddTextureSRV(bronzeRendMat, "Albedo", bronzeA);
+	AddTextureSRV(bronzeRendMat, "NormalMap", bronzeN);
+	AddTextureSRV(bronzeRendMat, "RoughnessMap", bronzeR);
 
-	std::shared_ptr<Material> bronzeMat = std::make_shared<Material>(XMFLOAT3(1, 1, 1), XMFLOAT2(2, 2));
-	bronzeMat->AddSampler("BasicSampler", samplerOptions);
-	bronzeMat->AddTextureSRV("Albedo", bronzeA);
-	bronzeMat->AddTextureSRV("NormalMap", bronzeN);
-	bronzeMat->AddTextureSRV("RoughnessMap", bronzeR);
 
-	std::shared_ptr<Material> roughMat = std::make_shared<Material>(XMFLOAT3(1, 1, 1), XMFLOAT2(2, 2));
-	roughMat->AddSampler("BasicSampler", samplerOptions);
-	roughMat->AddTextureSRV("Albedo", roughA);
-	roughMat->AddTextureSRV("NormalMap", roughN);
-	roughMat->AddTextureSRV("RoughnessMap", roughR);
+	std::shared_ptr<RendMat> roughRendMat =
+		std::make_shared<RendMat>(
+			XMFLOAT3(1, 1, 1),
+			XMFLOAT2(0, 0),
+			XMFLOAT2(2, 2),
+			L"VertexShader.cso",
+			L"PixelCommon.cso"
+		);
+	AddSampler(roughRendMat, "BasicSampler", samplerOptions);
+	AddTextureSRV(roughRendMat, "Albedo", roughA);
+	AddTextureSRV(roughRendMat, "NormalMap", roughN);
+	AddTextureSRV(roughRendMat, "RoughnessMap", roughR);
 
-	std::shared_ptr<Material> woodMat = std::make_shared<Material>(XMFLOAT3(1, 1, 1), XMFLOAT2(2, 2));
-	woodMat->AddSampler("BasicSampler", samplerOptions);
-	woodMat->AddTextureSRV("Albedo", woodA);
-	woodMat->AddTextureSRV("NormalMap", woodN);
-	woodMat->AddTextureSRV("RoughnessMap", woodR);
+
+	std::shared_ptr<RendMat> woodRendMat =
+		std::make_shared<RendMat>(
+			XMFLOAT3(1, 1, 1),
+			XMFLOAT2(0, 0),
+			XMFLOAT2(2, 2),
+			L"VertexShader.cso",
+			L"PixelCommon.cso"
+		);
+	AddSampler(woodRendMat, "BasicSampler", samplerOptions);
+	AddTextureSRV(woodRendMat, "Albedo", woodA);
+	AddTextureSRV(woodRendMat, "NormalMap", woodN);
+	AddTextureSRV(woodRendMat, "RoughnessMap", woodR);
 
 
 
@@ -327,36 +348,36 @@ void Game::LoadAssetsAndCreateEntities()
 	// Generate Cornell-like cube 
 	float yOffset = 1.0f;
 
-	std::shared_ptr<GameEntity> leftWall = std::make_shared<GameEntity>(planeMesh, cobbleMat2x);
+	std::shared_ptr<GameEntity> leftWall = std::make_shared<GameEntity>(planeMesh, cobble2xRendMat);
 	leftWall->GetTransform()->SetPosition(-2, yOffset, 0);
 	leftWall->GetTransform()->Rotate(0.0f, 0.0f, -XM_PI / 2.0f);
 	leftWall->GetTransform()->SetScale(2.0f);
 
-	std::shared_ptr<GameEntity> rightWall = std::make_shared<GameEntity>(planeMesh, cobbleMat2x);
+	std::shared_ptr<GameEntity> rightWall = std::make_shared<GameEntity>(planeMesh, cobble2xRendMat);
 	rightWall->GetTransform()->SetPosition(2, yOffset, 0);
 	rightWall->GetTransform()->Rotate(-XM_PI / 2.0f, 0.0f, XM_PI / 2.0f);
 	rightWall->GetTransform()->SetScale(2.0f);
 	
-	std::shared_ptr<GameEntity> backWall = std::make_shared<GameEntity>(planeMesh, cobbleMat2x);
+	std::shared_ptr<GameEntity> backWall = std::make_shared<GameEntity>(planeMesh, cobble2xRendMat);
 	backWall->GetTransform()->SetPosition(0.0f, yOffset, 2.0f);
 	backWall->GetTransform()->Rotate(-XM_PI / 2.0f, 0.0f, 0.0f);
 	backWall->GetTransform()->SetScale(2.0f);
 
-	std::shared_ptr<GameEntity> floor = std::make_shared<GameEntity>(planeMesh, roughMat);
+	std::shared_ptr<GameEntity> floor = std::make_shared<GameEntity>(planeMesh, roughRendMat);
 	floor->GetTransform()->SetPosition(0.0f, -2.0f + yOffset, 0.0f);
 	floor->GetTransform()->SetScale(2.0f);
 
-	std::shared_ptr<GameEntity> roof = std::make_shared<GameEntity>(planeMesh, roughMat);
+	std::shared_ptr<GameEntity> roof = std::make_shared<GameEntity>(planeMesh, roughRendMat);
 	roof->GetTransform()->SetPosition(0.0f, 2.0f + yOffset, 0.0f);
 	roof->GetTransform()->Rotate(0.0f, 0.0f, XM_PI);
 	roof->GetTransform()->SetScale(2.0f);
 
-	std::shared_ptr<GameEntity> cubeA = std::make_shared<GameEntity>(cubeMesh, paintMat);
+	std::shared_ptr<GameEntity> cubeA = std::make_shared<GameEntity>(cubeMesh, paintRendMat);
 	cubeA->GetTransform()->SetPosition(1.0f, -1.5f + yOffset, 0.0f);
 	cubeA->GetTransform()->Rotate(0.0f, XM_PI / 4.0f, 0.0f);
 	cubeA->GetTransform()->SetScale(1.0f);
 
-	std::shared_ptr<GameEntity> cubeB = std::make_shared<GameEntity>(cubeMesh, bronzeMat);
+	std::shared_ptr<GameEntity> cubeB = std::make_shared<GameEntity>(cubeMesh, bronzeRendMat);
 	cubeB->GetTransform()->SetPosition(-1.0f, -1.25f + yOffset, 0.0f);
 	cubeB->GetTransform()->Rotate(0.0f, 0.0f, 0.0f);
 	cubeB->GetTransform()->SetScale(1.5f);
@@ -645,7 +666,6 @@ void Game::Draw(float deltaTime, float totalTime)
 	{
 		// Vertex data is updated per entity 
 		SetVertexShader(
-			/*ge->GetMaterial()->GetVertexShader()*/
 			nameToVS[L"VertexShader.cso"],
 			ge->GetTransform(),
 			&playersData->cams[0], 

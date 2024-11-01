@@ -52,6 +52,27 @@ private:
 
 struct RendMat
 {
+
+	RendMat(
+		DirectX::XMFLOAT3 _colorTint,
+		DirectX::XMFLOAT2 _uvOffset,
+		DirectX::XMFLOAT2 _uvScale,
+		const wchar_t* _vsName,
+		const wchar_t* _psName) :
+		colorTint(_colorTint),
+		uvOffset(_uvOffset),
+		uvScale(_uvScale),
+		vsName(_vsName),
+		psName(_psName) { }
+
+	RendMat(
+		DirectX::XMFLOAT3 _colorTint,
+		DirectX::XMFLOAT2 _uvOffset,
+		DirectX::XMFLOAT2 _uvScale) :
+		colorTint(_colorTint),
+		uvOffset(_uvOffset),
+		uvScale(_uvScale) { }
+
 	// TODO: Make materials more generic with their data 
 	// Material universal properties
 	DirectX::XMFLOAT3 colorTint;

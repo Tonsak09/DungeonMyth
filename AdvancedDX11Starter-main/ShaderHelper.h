@@ -56,11 +56,11 @@ static void SetVertexShader(
 /// </summary>
 static void SetMateralPixelData(
 	std::shared_ptr<SimplePixelShader> ps,
-	std::shared_ptr<Material> material)
+	std::shared_ptr<RendMat> material)
 {
-	ps->SetFloat3("colorTint", material->GetColorTint());
-	ps->SetFloat2("uvScale", material->GetUVScale());
-	ps->SetFloat2("uvOffset", material->GetUVOffset());
+	ps->SetFloat3("colorTint", material->colorTint);
+	ps->SetFloat2("uvScale", material->uvScale);
+	ps->SetFloat2("uvOffset", material->uvOffset);
 	ps->CopyAllBufferData();
 }
 
@@ -68,7 +68,7 @@ static void SetMateralPixelData(
 /// Sends buffer data for the CommonPixel shader 
 /// </summary>
 static void SetCommonPixel(
-	std::shared_ptr<Material> material,
+	std::shared_ptr<RendMat> material,
 	std::shared_ptr<SimplePixelShader> ps,
 	Light dirLight,
 	DirectX::XMFLOAT3 camPos,

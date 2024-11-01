@@ -38,6 +38,7 @@ private:
 
 	// Our scene
 	std::vector<std::shared_ptr<GameEntity>> entities;
+	std::vector<std::vector<std::shared_ptr<GameEntity>>> shaderSplitEntityList;
 	bool updateMouseDelta; 
 
 	// Player

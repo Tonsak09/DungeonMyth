@@ -42,7 +42,7 @@ struct DebugDrawData
 {
 	std::vector<DebugEntity> drawGroup;
 	std::vector<std::shared_ptr<Mesh>> debugMeshes;
-	std::shared_ptr<Material> debugMat;
+	std::shared_ptr<RendMat> debugMat;
 
 	std::vector<float> lifeTimes;
 
@@ -64,8 +64,10 @@ struct DebugDrawData
 		std::shared_ptr<Mesh> sphereMesh = std::make_shared<Mesh>(
 			FixPath(L"../../Assets/Models/sphere.obj").c_str(), device);
 
-		debugMat = std::make_shared<Material>(
-			DirectX::XMFLOAT3(1, 1, 1), DirectX::XMFLOAT2(2, 2));
+		debugMat = std::make_shared<RendMat>(
+			DirectX::XMFLOAT3(1, 1, 1), 
+			DirectX::XMFLOAT2(0, 0),
+			DirectX::XMFLOAT2(2, 2));
 		debugMeshes.push_back(sphereMesh);
 		debugMeshes.push_back(sphereMesh);
 		debugMeshes.push_back(sphereMesh);

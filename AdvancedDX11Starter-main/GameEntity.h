@@ -11,14 +11,14 @@
 class GameEntity
 {
 public:
-	GameEntity(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material);
+	GameEntity(std::shared_ptr<Mesh> mesh, std::shared_ptr<RendMat> material);
 
 	std::shared_ptr<Mesh> GetMesh();
-	std::shared_ptr<Material> GetMaterial();
+	std::shared_ptr<RendMat> GetMaterial();
 	Transform* GetTransform();
 
 	void SetMesh(std::shared_ptr<Mesh> mesh);
-	void SetMaterial(std::shared_ptr<Material> material);
+	void SetMaterial(std::shared_ptr<RendMat> material);
 
 	void Draw(
 		Microsoft::WRL::ComPtr<ID3D11DeviceContext> context, 
@@ -28,7 +28,7 @@ public:
 private:
 
 	std::shared_ptr<Mesh> mesh;
-	std::shared_ptr<Material> material;
+	std::shared_ptr<RendMat> material;
 	Transform transform;
 };
 
