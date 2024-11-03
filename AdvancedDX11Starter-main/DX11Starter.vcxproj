@@ -173,6 +173,7 @@
   <ItemGroup>
     <None Include="Lighting.hlsli" />
     <None Include="packages.config" />
+    <None Include="Voronoi.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PixelCommon.hlsl">
