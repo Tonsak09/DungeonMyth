@@ -43,8 +43,7 @@ void GameEntity::SetMaterial(std::shared_ptr<RendMat> material) { this->material
 
 void GameEntity::Draw(
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> context,
-	std::shared_ptr<SimplePixelShader> inPS,
-	Camera* camera)
+	std::shared_ptr<SimplePixelShader> inPS)
 {
 	// Set up the material (shaders)
 	//material->PrepareMaterial(&transform, camera);

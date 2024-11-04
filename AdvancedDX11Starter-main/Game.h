@@ -65,6 +65,15 @@ private:
 		std::shared_ptr<RendMat> mat,
 		const wchar_t* matName);
 
+	// Entities grouped by shader type 
+	// Group 1 is PixelShader
+	// Group 2 is VertexShader
+	std::vector<std::vector<std::shared_ptr<GameEntity>>> entityGroups;
+	void GroupEntitiesByShaders();
+	void AddEntities();
+	void RemoveEntities();
+
+
 	// Texture related resources
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerOptions;
 

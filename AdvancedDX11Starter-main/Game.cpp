@@ -395,6 +395,8 @@ void Game::LoadAssetsAndCreateEntities()
 	lightMesh = sphereMesh;
 	lightVS = nameToVS[L"VertexShader.cso"];
 	lightPS = nameToPS[L"SolidColorPS.cso"];
+
+	GroupEntitiesByShaders();
 }
 
 
@@ -653,29 +655,39 @@ void Game::Draw(float deltaTime, float totalTime)
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 
-	// Set buffer data specifically for the CommonPixel shader 
-	SetCommonPixel(
-		entities[0]->GetMaterial(),
-		nameToPS[L"PixelCommon.cso"],
-		lights[0],
-		playersData->cams[0].transform.GetPosition(),
-		shadowSRV, shadowSampler);
-
-	// Draw all of the entities
-	for (auto& ge : entities)
+	for (auto group : entityGroups)
 	{
-		// Vertex data is updated per entity 
-		SetVertexShader(
-			nameToVS[L"VertexShader.cso"],
-			ge->GetTransform(),
-			&playersData->cams[0], 
-			shadowViewMatrix,
-			shadowProjectionMatrix);
-		
-		// Draw the entity
-		ge->Draw(context, nameToPS[L"PixelCommon.cso"], &playersData->cams[0]);
-	}
+		// Pixel shader is set for entire group 
+		// since they are (currently) not entity dependent 
 
+		std::shared_ptr<SimplePixelShader> ps = nameToPS[group[0]->GetMaterial()->psName];
+
+		// Todo: Use switch statement to find out which set_Pixel func
+		//		 to call 
+
+		SetCommonPixel(
+			group[0]->GetMaterial(),
+			ps,
+			lights[0],
+			playersData->cams[0].transform.GetPosition(),
+			shadowSRV, shadowSampler
+		);
+
+		for (auto entity : group)
+		{
+			// Vertex shader must be set for entire group
+			// since they are entity dependent 
+			SetVertexShader(
+				nameToVS[entity->GetMaterial()->vsName],
+				entity->GetTransform(),
+				&playersData->cams[0],
+				shadowViewMatrix,
+				shadowProjectionMatrix);
+
+			// Draw entity 
+			entity->Draw(context, ps);
+		}
+	}
 
 #if defined(DEBUG) || defined(_DEBUG)
 	// Debug Drawing 
@@ -688,7 +700,7 @@ void Game::Draw(float deltaTime, float totalTime)
 		ps->CopyBufferData("perFrame");
 
 		// Draw the entity
-		ge.entity->Draw(context, ps, &playersData->cams[0]);
+		ge.entity->Draw(context, ps);
 	}
 #endif
 
@@ -810,6 +822,40 @@ void Game::OnWorldLightChange()
 	XMStoreFloat4x4(&shadowProjectionMatrix, lightProjection);
 }
 
+/// <summary>
+/// Distribute group of active entities into shader groups. 
+/// Used for reseting all entities or loading a scene 
+/// </summary>
+void Game::GroupEntitiesByShaders()
+{
+	// Cleanup 
+	entityGroups.clear();
+
+
+	std::unordered_map<std::shared_ptr<SimplePixelShader>, int> psToIndex;
+	for (auto entity : entities)
+	{
+		// Current entity shaders 
+		std::shared_ptr<SimplePixelShader> ps =
+			nameToPS[entity->GetMaterial()->psName];
+		std::shared_ptr<SimpleVertexShader> vs =
+			nameToVS[entity->GetMaterial()->vsName];
+
+		// Check if pixel shader exists 
+		if (psToIndex.find(ps) == psToIndex.end())
+		{
+			// Remember new ps index relation 
+			psToIndex.insert(
+				std::pair<std::shared_ptr<SimplePixelShader>, int>
+				(ps, entityGroups.size()));
+
+			// Add new entity group which all use this type of ps 
+			entityGroups.push_back(std::vector<std::shared_ptr<GameEntity>>());
+		}
+		
+		entityGroups[psToIndex[ps]].push_back(entity);
+	}
+}
 
 // --------------------------------------------------------
 // Prepares a new frame for the UI, feeding it fresh

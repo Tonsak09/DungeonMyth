@@ -21,9 +21,8 @@ public:
 	void SetMaterial(std::shared_ptr<RendMat> material);
 
 	void Draw(
-		Microsoft::WRL::ComPtr<ID3D11DeviceContext> context, 
-		std::shared_ptr<SimplePixelShader> inPS,
-		Camera* camera);
+		Microsoft::WRL::ComPtr<ID3D11DeviceContext> context,
+		std::shared_ptr<SimplePixelShader> inPS);
 
 private:
 
