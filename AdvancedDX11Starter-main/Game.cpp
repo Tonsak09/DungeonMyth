@@ -136,7 +136,7 @@ void Game::Init()
 /// Stores a vertex shader into the game 
 /// </summary>
 /// <param name="name"></param>
-void Game::AddVS(const wchar_t* name)
+void Game::AddVS(const wchar_t* name, VertexShaders linkedEnum)
 {
 	std::shared_ptr<SimpleVertexShader> vertexShader = 
 		LoadShader(SimpleVertexShader, name);
@@ -149,7 +149,7 @@ void Game::AddVS(const wchar_t* name)
 /// Stores a pixel shader into the game 
 /// </summary>
 /// <param name="name"></param>
-void Game::AddPS(const wchar_t* name)
+void Game::AddPS(const wchar_t* name, PixelShaders linkedEnum)
 {
 	std::shared_ptr<SimplePixelShader> pixelShader =
 		LoadShader(SimplePixelShader, name);
@@ -177,11 +177,14 @@ void Game::AddMat(
 // --------------------------------------------------------
 void Game::LoadAssetsAndCreateEntities()
 {
+	psNameToID = std::unordered_map<const wchar_t*, PixelShaders>();
+	vsNameToID = std::unordered_map<const wchar_t*, VertexShaders>();
+
 	// Load active shaders 
-	AddVS(L"VertexShader.cso");
-	AddVS(L"ShadowVertex.cso");
-	AddPS(L"PixelCommon.cso");
-	AddPS(L"SolidColorPS");
+	AddVS(	L"VertexShader.cso",	VERTEX_SHADER	);
+	AddVS(	L"ShadowVertex.cso",	SHADOW_VERTEX	);
+	AddPS(	L"PixelCommon.cso",		COMMON			);
+	AddPS(	L"SolidColorPS",		SOLID_COLOR		);
 
 	// Shaders only needed here 
 	std::shared_ptr<SimpleVertexShader> skyVS = LoadShader(SimpleVertexShader, L"SkyVS.cso");
@@ -662,15 +665,15 @@ void Game::Draw(float deltaTime, float totalTime)
 
 		std::shared_ptr<SimplePixelShader> ps = nameToPS[group[0]->GetMaterial()->psName];
 
-		// Todo: Use switch statement to find out which set_Pixel func
-		//		 to call 
+		 
 
-		SetCommonPixel(
+		SetPixelShader(
 			group[0]->GetMaterial(),
 			ps,
 			lights[0],
 			playersData->cams[0].transform.GetPosition(),
-			shadowSRV, shadowSampler
+			shadowSRV, shadowSampler,
+			psNameToID
 		);
 
 		for (auto entity : group)

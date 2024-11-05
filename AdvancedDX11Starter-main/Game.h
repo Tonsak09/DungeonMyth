@@ -59,8 +59,8 @@ private:
 	std::unordered_map<const wchar_t*, std::shared_ptr<SimpleVertexShader>> nameToVS;
 	std::unordered_map<const wchar_t*, std::shared_ptr<SimplePixelShader>> nameToPS;
 	std::unordered_map<const wchar_t*, std::shared_ptr<RendMat>> nameToMat;
-	void AddVS(const wchar_t* name);
-	void AddPS(const wchar_t* name);
+	void AddVS(const wchar_t* name, VertexShaders linkedEnum);
+	void AddPS(const wchar_t* name, PixelShaders linkedEnum);
 	void AddMat(
 		std::shared_ptr<RendMat> mat,
 		const wchar_t* matName);
@@ -69,6 +69,8 @@ private:
 	// Group 1 is PixelShader
 	// Group 2 is VertexShader
 	std::vector<std::vector<std::shared_ptr<GameEntity>>> entityGroups;
+	std::unordered_map<const wchar_t*, PixelShaders>  psNameToID;
+	std::unordered_map<const wchar_t*, VertexShaders> vsNameToID;
 	void GroupEntitiesByShaders();
 	void AddEntities();
 	void RemoveEntities();

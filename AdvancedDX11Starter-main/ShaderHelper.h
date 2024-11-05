@@ -15,12 +15,52 @@
 #include "Transform.h"
 #include "Camera.h"
 
+// NOTE: To add a shader you must refer to it in the 
+//		 following sections. 
+//			A) In the PS/VS enum 
+//			B) Add a function for setting it 
+//			C) Include setting function in set PS/VS function 
+
+// This should keep the adding of new shaders within this file
+// and allow for the swapping of shader types to be easier 
+// within game. 
+
+// Also note that when loading a new shader to link it with the 
+// appropriate shader enum 
+
 
 enum PixelShaders
 {
-	COMMON
+	COMMON,
+	SOLID_COLOR
 };
 
+enum VertexShaders
+{
+	VERTEX_SHADER,
+	SHADOW_VERTEX,
+};
+
+
+static void LinkPSShader(
+	const wchar_t* name, 
+	PixelShaders link,
+	std::unordered_map<const wchar_t*, PixelShaders>  psNameToID)
+{
+
+	if (psNameToID.find(name) == psNameToID.end())
+	{
+		// Add new shader combination 
+		psNameToID.insert(
+			std::pair<const wchar_t*, PixelShaders>
+			(name, link));
+	}
+	else
+	{
+		// Replace 
+		psNameToID[name] = link;
+	}
+}
 
 #pragma region VERTEX_SHADERS
 
@@ -51,6 +91,8 @@ static void SetVertexShader(
 
 #pragma region PIXEL_SHADERS
 
+
+
 /// <summary>
 /// Sends data universal to every material 
 /// </summary>
@@ -58,6 +100,10 @@ static void SetMateralPixelData(
 	std::shared_ptr<SimplePixelShader> ps,
 	std::shared_ptr<RendMat> material)
 {
+	// TODO: Loop through material vector of pairs
+	//		 and send data to shader. Should help 
+	//		 make materials more generic 
+
 	ps->SetFloat3("colorTint", material->colorTint);
 	ps->SetFloat2("uvScale", material->uvScale);
 	ps->SetFloat2("uvOffset", material->uvOffset);
@@ -93,5 +139,42 @@ static void SetCommonPixel(
 	SetMateralPixelData(ps, material);
 }
 
+static void SetSolidColor(
+	std::shared_ptr<RendMat> material,
+	std::shared_ptr<SimplePixelShader> ps,
+	Light dirLight,
+	DirectX::XMFLOAT3 camPos,
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shadowSRV,
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> shadowSampler)
+{
+	// TODO...
+}
+
+
+/// <summary>
+/// Sets up a lit pixel shader 
+/// </summary>
+static void SetPixelShader(
+	std::shared_ptr<RendMat> material,
+	std::shared_ptr<SimplePixelShader> ps,
+	Light dirLight,
+	DirectX::XMFLOAT3 camPos,
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shadowSRV,
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> shadowSampler,
+	std::unordered_map<const wchar_t*, PixelShaders>  psNameToID)
+{
+
+	int type = psNameToID[material->psName];
+
+	switch (type)
+	{
+	case COMMON:
+		SetCommonPixel(material, ps, dirLight, camPos, shadowSRV, shadowSampler);
+	case SOLID_COLOR:
+
+	default:
+		break;
+	}
+}
 
 #pragma endregion 
