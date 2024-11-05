@@ -28,12 +28,12 @@ cbuffer perFrame : register(b1)
 // - Should match the output of our corresponding vertex shader
 struct VertexToPixel
 {
-    float4 screenPosition : SV_POSITION;
-    float2 uv : TEXCOORD;
-    float3 normal : NORMAL;
-    float3 tangent : TANGENT;
-    float3 worldPos : POSITION; // The world position of this PIXEL
-    float4 shadowMapPos : SHADOW_POSITION;
+    float4 screenPosition   : SV_POSITION;
+    float2 uv               : TEXCOORD;
+    float3 normal           : NORMAL;
+    float3 tangent          : TANGENT;
+    float3 worldPos         : POSITION; // The world position of this PIXEL
+    float4 shadowMapPos     : SHADOW_POSITION;
 };
 
 
@@ -48,8 +48,11 @@ SamplerComparisonState ShadowSampler : register(s1);
 // Entry point for this pixel shader
 float4 main(VertexToPixel input) : SV_TARGET
 {
+    float4 surfaceColor = Albedo.Sample(BasicSampler, input.uv);
+    if(surfaceColor.w <= 0.1f)
+        discard;
     
-    // Shadows
+    
     
     // Perform the perspective divide (divide by W) ourselves
     input.shadowMapPos /= input.shadowMapPos.w;
@@ -84,7 +87,7 @@ float4 main(VertexToPixel input) : SV_TARGET
     float specPower = max(256.0f * (1.0f - roughness), 0.01f); // Ensure we never hit 0
 	
 	// Gamma correct the texture back to linear space and apply the color tint
-    float4 surfaceColor = Albedo.Sample(BasicSampler, input.uv);
+    
     surfaceColor.rgb = pow(surfaceColor.rgb, 2.2) * colorTint;
 
 	// Total color for this pixel

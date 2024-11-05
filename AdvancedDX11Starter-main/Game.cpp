@@ -207,6 +207,7 @@ void Game::LoadAssetsAndCreateEntities()
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> bronzeA,  bronzeN,  bronzeR,  bronzeM;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> roughA,  roughN,  roughR,  roughM;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> woodA,  woodN,  woodR,  woodM;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> heronA, heronN, heronR, heronM;
 
 	// Load the textures using our succinct LoadTexture() macro
 	LoadTexture(L"../../Assets/Textures/cobblestone_albedo.png", cobbleA);
@@ -243,6 +244,8 @@ void Game::LoadAssetsAndCreateEntities()
 	LoadTexture(L"../../Assets/Textures/wood_normals.png", woodN);
 	LoadTexture(L"../../Assets/Textures/wood_roughness.png", woodR);
 	LoadTexture(L"../../Assets/Textures/wood_metal.png", woodM);
+
+	LoadTexture(L"../../Assets/Textures/HeronScissors.png", heronA);
 
 	// Describe and create our sampler state
 	D3D11_SAMPLER_DESC sampDesc = {};
@@ -345,6 +348,20 @@ void Game::LoadAssetsAndCreateEntities()
 	AddTextureSRV(woodRendMat, "RoughnessMap", woodR);
 
 
+	std::shared_ptr<RendMat> heronRendMat =
+		std::make_shared<RendMat>(
+			XMFLOAT3(1, 1, 1),
+			XMFLOAT2(0, 0),
+			XMFLOAT2(1, 1),
+			L"VertexShader.cso",
+			L"PixelCommon.cso"
+		);
+	AddSampler(heronRendMat, "BasicSampler", samplerOptions);
+	AddTextureSRV(heronRendMat, "Albedo", heronA);
+	AddTextureSRV(heronRendMat, "NormalMap", woodN);
+	AddTextureSRV(heronRendMat, "RoughnessMap", woodR);
+
+
 
 	// Create the non-PBR entities ==============================
 
@@ -386,6 +403,9 @@ void Game::LoadAssetsAndCreateEntities()
 	cubeB->GetTransform()->SetScale(1.5f);
 
 
+	swordEntity = std::make_shared<GameEntity>(planeMesh, heronRendMat);
+	wandEntity = std::make_shared<GameEntity>(planeMesh, heronRendMat);
+
 	entities.push_back(leftWall);
 	entities.push_back(rightWall);
 	entities.push_back(backWall);
@@ -393,6 +413,8 @@ void Game::LoadAssetsAndCreateEntities()
 	entities.push_back(roof);
 	entities.push_back(cubeA);
 	entities.push_back(cubeB);
+	entities.push_back(swordEntity);
+	entities.push_back(wandEntity);
 
 	// Save assets needed for drawing point lights
 	lightMesh = sphereMesh;
@@ -549,10 +571,13 @@ void Game::Update(float deltaTime, float totalTime)
 	BuildUI();
 
 
-	// Update the camera
+	// Update the player
 	std::vector<PlayerInput> inputs = PlayersInputs(updateMouseDelta);
 	TransformPlayers(playersData.get(), inputs, deltaTime);
-
+	UpdatePlayerGameLogic(
+		playersData.get(),
+		swordEntity, wandEntity,
+		deltaTime);
 
 	// Check individual input
 	Input& input = Input::GetInstance();

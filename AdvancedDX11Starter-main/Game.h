@@ -43,6 +43,8 @@ private:
 
 	// Player
 	std::shared_ptr<PlayersData> playersData;
+	std::shared_ptr<GameEntity> swordEntity;
+	std::shared_ptr<GameEntity> wandEntity;
 
 	// Lights
 	std::vector<Light> lights;

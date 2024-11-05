@@ -33,10 +33,6 @@ public:
 
 	// Player Gameplay Resources 
 
-	// Player Inventory Bag
-
-	// Player Inventory Hands 
-
 	// Player Transform Data
 	std::vector<PlayerTransformData> transformData; 
 
@@ -57,6 +53,8 @@ struct PlayerInput
 {
 	DirectX::XMFLOAT3 dir;
 	DirectX::XMFLOAT2 mouseDelta; 
+	bool leftMouseClicked;
+	bool rightMouseClicked;
 };
 
 /// <summary>
@@ -222,7 +220,38 @@ static void TransformPlayers(PlayersData* data, std::vector<PlayerInput> inputs,
 	}
 }
 
+static void UpdatePlayerGameLogic(
+	PlayersData* data, 
+	std::shared_ptr<GameEntity> heldSword,
+	std::shared_ptr<GameEntity> heldWand,
+	float delta)
+{
+	Transform trans = data->transforms[0];
+	DirectX::XMFLOAT3 pos = data->cams[0].transform.GetPosition();
+	DirectX::XMFLOAT3 cForward = data->cams[0].transform.GetForward();
+	DirectX::XMFLOAT3 cUp = data->cams[0].transform.GetUp();
+	DirectX::XMFLOAT3 sOffset(trans.GetRight());
+	const float horzOffset = 0.8f;
+	const float vertOffset = -0.1f;
+	
+	// Offset sword position 
+	DirectX::XMVECTOR sPos = DirectX::XMLoadFloat3(&pos);
+	sPos = DirectX::XMVectorAdd( // Horizontal 
+		sPos,
+		DirectX::XMVectorScale(DirectX::XMLoadFloat3(&sOffset), horzOffset));
+	sPos = DirectX::XMVectorAdd( // Cam Forward  
+		sPos,
+		DirectX::XMVectorScale(DirectX::XMLoadFloat3(&cForward), 2.0f));
 
+	DirectX::XMFLOAT3 sTarget;
+	DirectX::XMStoreFloat3(&sTarget, sPos);
+
+	heldSword->GetTransform()->SetPosition(sTarget);
+	heldSword->GetTransform()->SetRotation(data->cams[0].transform.GetPitchYawRoll());
+	heldSword->GetTransform()->Rotate(0.0f, 0.0f, DirectX::XM_PI / 5.0f);
+
+	heldSword->GetTransform()->MoveAbsolute(DirectX::XMFLOAT3(0, vertOffset, 0));
+}
 
 /// <summary>
 /// Gets all the current input data of players and
@@ -287,6 +316,10 @@ static std::vector<PlayerInput> PlayersInputs(bool updateMouseDelta)
 			curr.mouseDelta = DirectX::XMFLOAT2(0.0f, 0.0f);
 		}
 		
+
+		// Mouse input 
+		curr.leftMouseClicked = input.MouseLeftDown();
+		curr.rightMouseClicked = input.MouseLeftDown();
 
 		curr.dir = dirInput;
 		inputs.push_back(curr);
