@@ -56,6 +56,13 @@ protected:
 	unsigned int windowWidth;
 	unsigned int windowHeight;
 
+	// Target ratio size 
+	const float outputX = 1280;
+	const float outputY = 720;
+
+	float targetSizeX;
+	float targetSizeY;
+
 	// Does our window currently have focus?
 	// Helpful if we want to pause while not the active window
 	bool hasFocus;

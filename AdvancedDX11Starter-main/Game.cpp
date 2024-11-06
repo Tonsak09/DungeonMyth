@@ -39,7 +39,7 @@ using namespace DirectX;
 Game::Game(HINSTANCE hInstance)
 	: DXCore(
 		hInstance,			// The application's handle
-		L"DirectX Game",	// Text for the window's title bar (as a wide-character string)
+		L"Dungeon Myth",	// Text for the window's title bar (as a wide-character string)
 		1280,				// Width of the window's client area
 		720,				// Height of the window's client area
 		false,				// Sync the framerate to the monitor refresh? (lock framerate)
@@ -208,6 +208,7 @@ void Game::LoadAssetsAndCreateEntities()
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> roughA,  roughN,  roughR,  roughM;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> woodA,  woodN,  woodR,  woodM;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> heronA, heronN, heronR, heronM;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> wandA, wandN, wandR, wandM;
 
 	// Load the textures using our succinct LoadTexture() macro
 	LoadTexture(L"../../Assets/Textures/cobblestone_albedo.png", cobbleA);
@@ -246,6 +247,7 @@ void Game::LoadAssetsAndCreateEntities()
 	LoadTexture(L"../../Assets/Textures/wood_metal.png", woodM);
 
 	LoadTexture(L"../../Assets/Textures/HeronScissors.png", heronA);
+	LoadTexture(L"../../Assets/Textures/Crowbar_Temp.png", wandA);
 
 	// Describe and create our sampler state
 	D3D11_SAMPLER_DESC sampDesc = {};
@@ -361,6 +363,19 @@ void Game::LoadAssetsAndCreateEntities()
 	AddTextureSRV(heronRendMat, "NormalMap", woodN);
 	AddTextureSRV(heronRendMat, "RoughnessMap", woodR);
 
+	std::shared_ptr<RendMat> wandRendMat =
+		std::make_shared<RendMat>(
+			XMFLOAT3(1, 1, 1),
+			XMFLOAT2(0, 0),
+			XMFLOAT2(1, 1),
+			L"VertexShader.cso",
+			L"PixelCommon.cso"
+		);
+	AddSampler(wandRendMat, "BasicSampler", samplerOptions);
+	AddTextureSRV(wandRendMat, "Albedo", wandA);
+	AddTextureSRV(wandRendMat, "NormalMap", woodN);
+	AddTextureSRV(wandRendMat, "RoughnessMap", woodR);
+
 
 
 	// Create the non-PBR entities ==============================
@@ -404,7 +419,7 @@ void Game::LoadAssetsAndCreateEntities()
 
 
 	swordEntity = std::make_shared<GameEntity>(planeMesh, heronRendMat);
-	wandEntity = std::make_shared<GameEntity>(planeMesh, heronRendMat);
+	wandEntity = std::make_shared<GameEntity>(planeMesh, wandRendMat);
 
 	entities.push_back(leftWall);
 	entities.push_back(rightWall);
@@ -555,7 +570,7 @@ void Game::OnResize()
 	// Update our projection matrix to match the new aspect ratio
 	for (int i = 0; i < playersData->cams.size(); i++)
 	{
-		UpdateProjectionMatrix(&playersData->cams[i], this->windowWidth / (float)this->windowHeight);
+		UpdateProjectionMatrix(&playersData->cams[i], this->targetSizeX / (float)this->targetSizeY);
 	}
 }
 
@@ -627,6 +642,7 @@ void Game::DrawShadowMap()
 	D3D11_VIEWPORT viewport = {};
 	viewport.Width = (float)SHADOW_MAP_RESOLUTION;
 	viewport.Height = (float)SHADOW_MAP_RESOLUTION;
+	viewport.MinDepth = 0.0f;
 	viewport.MaxDepth = 1.0f;
 	context->RSSetViewports(1, &viewport);
 
@@ -652,6 +668,8 @@ void Game::DrawShadowMap()
 	context->RSSetState(0);
 
 	// Reset pipeline
+	viewport.TopLeftX = -(windowWidth - targetSizeX) / 2.0f;
+	viewport.TopLeftY = -(windowHeight - targetSizeY) / 2.0f;
 	viewport.Width = (float)this->windowWidth;
 	viewport.Height = (float)this->windowHeight;
 	context->RSSetViewports(1, &viewport);

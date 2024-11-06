@@ -185,6 +185,8 @@ HRESULT DXCore::InitDirect3D()
 	// This will hold options for Direct3D initialization
 	unsigned int deviceFlags = 0;
 
+
+
 #if defined(DEBUG) || defined(_DEBUG)
 	// If we're in debug mode in visual studio, we also
 	// want to make a "Debug Direct3D Device" to see some
@@ -209,12 +211,16 @@ HRESULT DXCore::InitDirect3D()
 		deviceSupportsTearing = SUCCEEDED(featureCheck) && tearingSupported;
 	}
 
+	float scale = max((float)windowWidth / outputX, (float)windowHeight / outputY);
+	targetSizeX = outputX * scale;
+	targetSizeY = outputY * scale;
+
 	// Create a description of how our swap
 	// chain should work
 	DXGI_SWAP_CHAIN_DESC swapDesc = {};
 	swapDesc.BufferCount		= 2;
-	swapDesc.BufferDesc.Width	= windowWidth;
-	swapDesc.BufferDesc.Height	= windowHeight;
+	swapDesc.BufferDesc.Width	= targetSizeX;
+	swapDesc.BufferDesc.Height	= targetSizeY;
 	swapDesc.BufferDesc.RefreshRate.Numerator = 60;
 	swapDesc.BufferDesc.RefreshRate.Denominator = 1;
 	swapDesc.BufferDesc.Format	= DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -269,8 +275,8 @@ HRESULT DXCore::InitDirect3D()
 	{
 		// Set up the description of the texture to use for the depth buffer
 		D3D11_TEXTURE2D_DESC depthStencilDesc	= {};
-		depthStencilDesc.Width					= windowWidth;
-		depthStencilDesc.Height					= windowHeight;
+		depthStencilDesc.Width					= targetSizeX;
+		depthStencilDesc.Height					= targetSizeY;
 		depthStencilDesc.MipLevels				= 1;
 		depthStencilDesc.ArraySize				= 1;
 		depthStencilDesc.Format					= DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -305,8 +311,8 @@ HRESULT DXCore::InitDirect3D()
 	D3D11_VIEWPORT viewport = {};
 	viewport.TopLeftX	= 0;
 	viewport.TopLeftY	= 0;
-	viewport.Width		= (float)windowWidth;
-	viewport.Height		= (float)windowHeight;
+	viewport.Width		= (float)targetSizeX;
+	viewport.Height		= (float)targetSizeY;
 	viewport.MinDepth	= 0.0f;
 	viewport.MaxDepth	= 1.0f;
 	context->RSSetViewports(1, &viewport);
@@ -325,6 +331,11 @@ HRESULT DXCore::InitDirect3D()
 // --------------------------------------------------------
 void DXCore::OnResize()
 {
+	float scale = max((float)windowWidth / outputX, (float)windowHeight / outputY);
+	targetSizeX = outputX * scale; 
+	targetSizeY = outputY * scale;
+
+	
 	// Resize the buffers that must match the window size
 	{
 		// Release the views before resizing the swap chain,
@@ -337,8 +348,8 @@ void DXCore::OnResize()
 		// which essentially destroys and recreates them
 		swapChain->ResizeBuffers(
 			2,
-			windowWidth,
-			windowHeight,
+			targetSizeX,
+			targetSizeY,
 			DXGI_FORMAT_R8G8B8A8_UNORM,
 			deviceSupportsTearing ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0);
 	}
@@ -360,8 +371,8 @@ void DXCore::OnResize()
 	{
 		// Set up the description of the texture to use for the depth buffer
 		D3D11_TEXTURE2D_DESC depthStencilDesc = {};
-		depthStencilDesc.Width = windowWidth;
-		depthStencilDesc.Height = windowHeight;
+		depthStencilDesc.Width = targetSizeX;
+		depthStencilDesc.Height = targetSizeY;
 		depthStencilDesc.MipLevels = 1;
 		depthStencilDesc.ArraySize = 1;
 		depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -390,14 +401,16 @@ void DXCore::OnResize()
 
 	// Set up a viewport so we render into
 	// to correct portion of the window
-	D3D11_VIEWPORT viewport = {};
+	/*D3D11_VIEWPORT viewport = {};
 	viewport.TopLeftX = 0;
 	viewport.TopLeftY = 0;
-	viewport.Width = (float)windowWidth;
-	viewport.Height = (float)windowHeight;
+	viewport.Width = (float)targetSizeX;
+	viewport.Height = (float)targetSizeY;
 	viewport.MinDepth = 0.0f;
 	viewport.MaxDepth = 1.0f;
-	context->RSSetViewports(1, &viewport);
+	context->RSSetViewports(1, &viewport);*/
+
+	//printf("%f: %f \n", viewport.TopLeftX + viewport.Width, viewport.Width);
 
 	// Are we in a fullscreen state?
 	swapChain->GetFullscreenState(&isFullscreen, 0);

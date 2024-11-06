@@ -226,31 +226,72 @@ static void UpdatePlayerGameLogic(
 	std::shared_ptr<GameEntity> heldWand,
 	float delta)
 {
-	Transform trans = data->transforms[0];
-	DirectX::XMFLOAT3 pos = data->cams[0].transform.GetPosition();
-	DirectX::XMFLOAT3 cForward = data->cams[0].transform.GetForward();
-	DirectX::XMFLOAT3 cUp = data->cams[0].transform.GetUp();
+	Transform trans				= data->transforms[0];
+	DirectX::XMFLOAT3 pos		= data->cams[0].transform.GetPosition();
+	DirectX::XMFLOAT3 cForward	= data->cams[0].transform.GetForward();
+	DirectX::XMFLOAT3 cUp		= data->cams[0].transform.GetUp();
 	DirectX::XMFLOAT3 sOffset(trans.GetRight());
-	const float horzOffset = 0.8f;
-	const float vertOffset = -0.1f;
+
+	// Positional Offset 
+	const float horzSwordOffset =  0.8f;
+	const float horzWandOffset	= -0.8f;
+	const float vertOffset		= -0.1f; // Causes interesting shakyness at small values 
+
+	const float rotZSword =  DirectX::XM_PI / 2.0f;
+	const float rotXSword = -DirectX::XM_PI / 8.0f;
+	const float rotZWand  =	-DirectX::XM_PI / 2.0f;
+	const float rotXWand  =	-DirectX::XM_PI / 3.0f;
+
+	{ // Sword
+		// Offset sword position 
+		DirectX::XMVECTOR sPos = DirectX::XMLoadFloat3(&pos);
+
+		// Horizontal 
+		sPos = DirectX::XMVectorAdd( 
+			sPos,
+			DirectX::XMVectorScale(DirectX::XMLoadFloat3(&sOffset), horzSwordOffset));
+
+		// Cam Forward  
+		sPos = DirectX::XMVectorAdd( 
+			sPos,
+			DirectX::XMVectorScale(DirectX::XMLoadFloat3(&cForward), 1.5f));
+
+		DirectX::XMFLOAT3 sTarget;
+		DirectX::XMStoreFloat3(&sTarget, sPos);
+
+		heldSword->GetTransform()->SetPosition(sTarget);
+		heldSword->GetTransform()->SetRotation(data->cams[0].transform.GetPitchYawRoll());
+		heldSword->GetTransform()->Rotate(0.0f, 0.0f, rotZSword);
+		heldSword->GetTransform()->Rotate(rotXSword, 0.0f, 0.0f);
+
+		heldSword->GetTransform()->MoveAbsolute(DirectX::XMFLOAT3(0, vertOffset, 0));
+	}
+
+	{ // Wand 
+		// Offset wand position 
+		DirectX::XMVECTOR sPos = DirectX::XMLoadFloat3(&pos);
+
+		// Horizontal 
+		sPos = DirectX::XMVectorAdd( 
+			sPos,
+			DirectX::XMVectorScale(DirectX::XMLoadFloat3(&sOffset), horzWandOffset));
+
+		// Cam Forward  
+		sPos = DirectX::XMVectorAdd( 
+			sPos,
+			DirectX::XMVectorScale(DirectX::XMLoadFloat3(&cForward), 1.5f));
+
+		DirectX::XMFLOAT3 sTarget;
+		DirectX::XMStoreFloat3(&sTarget, sPos);
+
+		heldWand->GetTransform()->SetPosition(sTarget);
+		heldWand->GetTransform()->SetRotation(data->cams[0].transform.GetPitchYawRoll());
+		heldWand->GetTransform()->Rotate(0.0f, 0.0f, rotZSword);
+		heldWand->GetTransform()->Rotate(rotXSword, 0.0f, 0.0f);
+
+		heldWand->GetTransform()->MoveAbsolute(DirectX::XMFLOAT3(0, vertOffset, 0));
+	}
 	
-	// Offset sword position 
-	DirectX::XMVECTOR sPos = DirectX::XMLoadFloat3(&pos);
-	sPos = DirectX::XMVectorAdd( // Horizontal 
-		sPos,
-		DirectX::XMVectorScale(DirectX::XMLoadFloat3(&sOffset), horzOffset));
-	sPos = DirectX::XMVectorAdd( // Cam Forward  
-		sPos,
-		DirectX::XMVectorScale(DirectX::XMLoadFloat3(&cForward), 2.0f));
-
-	DirectX::XMFLOAT3 sTarget;
-	DirectX::XMStoreFloat3(&sTarget, sPos);
-
-	heldSword->GetTransform()->SetPosition(sTarget);
-	heldSword->GetTransform()->SetRotation(data->cams[0].transform.GetPitchYawRoll());
-	heldSword->GetTransform()->Rotate(0.0f, 0.0f, DirectX::XM_PI / 5.0f);
-
-	heldSword->GetTransform()->MoveAbsolute(DirectX::XMFLOAT3(0, vertOffset, 0));
 }
 
 /// <summary>
