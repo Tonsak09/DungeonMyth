@@ -19,7 +19,8 @@
 //		 following sections. 
 //			A) In the PS/VS enum 
 //			B) Add a function for setting it 
-//			C) Include setting function in set PS/VS function 
+//			C) Include setting function in Set PS/VS function (Bottom of page)
+//			D) Link to VS/PS in LoadAssetsAndCreateEntities()
 
 // This should keep the adding of new shaders within this file
 // and allow for the swapping of shader types to be easier 
@@ -32,7 +33,8 @@
 enum PixelShaders
 {
 	COMMON,
-	SOLID_COLOR
+	SOLID_COLOR,
+	TRIPLANAR
 };
 
 enum VertexShaders
@@ -118,6 +120,7 @@ static void SetCommonPixel(
 	std::shared_ptr<SimplePixelShader> ps,
 	Light dirLight,
 	DirectX::XMFLOAT3 camPos,
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shadowTextureSRV,
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shadowSRV,
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> shadowSampler)
 {
@@ -135,6 +138,8 @@ static void SetCommonPixel(
 	ps->SetShaderResourceView("ShadowMap", shadowSRV);
 	ps->SetSamplerState("ShadowSampler", shadowSampler);
 
+	ps->SetShaderResourceView("ShadowTexture", shadowTextureSRV);
+
 	// Set data 
 	SetMateralPixelData(ps, material);
 }
@@ -150,6 +155,32 @@ static void SetSolidColor(
 	// TODO...
 }
 
+static void SetTriplanar(
+	std::shared_ptr<RendMat> material,
+	std::shared_ptr<SimplePixelShader> ps,
+	Light dirLight,
+	DirectX::XMFLOAT3 camPos,
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shadowSRV,
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> shadowSampler)
+{
+	// Common pixel shader from material 
+	ps->SetShader();
+
+	// Set data specific to this shader 
+	ps->SetData("worldLight", &dirLight, sizeof(Light));
+	ps->SetFloat3("cameraPosition", camPos);
+	ps->CopyBufferData("perFrame");
+
+	// Set shadowmap shader which is passed in
+	// every frame 
+	ps->SetShaderResourceView("ShadowMap", shadowSRV);
+	ps->SetSamplerState("ShadowSampler", shadowSampler);
+
+	// Set data 
+	PrepareMaterial(material, ps);
+	SetMateralPixelData(ps, material);
+}
+
 
 /// <summary>
 /// Sets up a lit pixel shader 
@@ -159,6 +190,7 @@ static void SetPixelShader(
 	std::shared_ptr<SimplePixelShader> ps,
 	Light dirLight,
 	DirectX::XMFLOAT3 camPos,
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shadowTextureSRV,
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shadowSRV,
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> shadowSampler,
 	std::unordered_map<const wchar_t*, PixelShaders>  psNameToID)
@@ -169,9 +201,13 @@ static void SetPixelShader(
 	switch (type)
 	{
 	case COMMON:
-		SetCommonPixel(material, ps, dirLight, camPos, shadowSRV, shadowSampler);
+		SetCommonPixel(material, ps, dirLight, camPos, shadowTextureSRV, shadowSRV, shadowSampler);
+		break;
 	case SOLID_COLOR:
-
+		break;
+	case TRIPLANAR:
+		SetTriplanar(material, ps, dirLight, camPos, shadowSRV, shadowSampler);
+		break;
 	default:
 		break;
 	}

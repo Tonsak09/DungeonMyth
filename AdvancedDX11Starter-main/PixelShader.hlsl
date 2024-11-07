@@ -1,4 +1,4 @@
-
+#include "Common.hlsli"
 #include "Lighting.hlsli"
 
 // How many lights could we handle?
@@ -29,23 +29,13 @@ cbuffer perFrame : register(b1)
 };
 
 
-// Defines the input to this pixel shader
-// - Should match the output of our corresponding vertex shader
-struct VertexToPixel
-{
-	float4 screenPosition	: SV_POSITION;
-	float2 uv				: TEXCOORD;
-	float3 normal			: NORMAL;
-	float3 tangent			: TANGENT;
-	float3 worldPos			: POSITION; // The world position of this PIXEL
-};
 
 
 // Texture-related variables
 Texture2D Albedo			: register(t0);
 Texture2D NormalMap			: register(t1);
 Texture2D RoughnessMap		: register(t2);
-SamplerState BasicSampler		: register(s0);
+SamplerState BasicSampler	: register(s0);
 
 
 // Entry point for this pixel shader

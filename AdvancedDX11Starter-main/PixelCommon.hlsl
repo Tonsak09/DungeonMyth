@@ -1,6 +1,7 @@
 
 #include "Lighting.hlsli"
-
+#include "Triplanar.hlsli"
+#include "Common.hlsli"
 
 // Data that can change per material
 cbuffer perMaterial : register(b0)
@@ -24,17 +25,7 @@ cbuffer perFrame : register(b1)
 };
 
 
-// Defines the input to this pixel shader
-// - Should match the output of our corresponding vertex shader
-struct VertexToPixel
-{
-    float4 screenPosition   : SV_POSITION;
-    float2 uv               : TEXCOORD;
-    float3 normal           : NORMAL;
-    float3 tangent          : TANGENT;
-    float3 worldPos         : POSITION; // The world position of this PIXEL
-    float4 shadowMapPos     : SHADOW_POSITION;
-};
+
 
 
 // Texture-related variables
@@ -42,6 +33,7 @@ Texture2D Albedo : register(t0);
 Texture2D NormalMap : register(t1);
 Texture2D RoughnessMap : register(t2);
 Texture2D ShadowMap : register(t3);
+Texture2D ShadowTexture : register(t4);
 SamplerState BasicSampler : register(s0);
 SamplerComparisonState ShadowSampler : register(s1);
 
@@ -51,8 +43,6 @@ float4 main(VertexToPixel input) : SV_TARGET
     float4 surfaceColor = Albedo.Sample(BasicSampler, input.uv);
     if(surfaceColor.w <= 0.1f)
         discard;
-    
-    
     
     // Perform the perspective divide (divide by W) ourselves
     input.shadowMapPos /= input.shadowMapPos.w;
@@ -70,6 +60,7 @@ float4 main(VertexToPixel input) : SV_TARGET
         ShadowSampler,
         shadowUV,
         distToLight).r;
+    //shadowAmount = ShadowTexture.Sample(BasicSampler, input.uv);
     shadowAmount = max(0.01f, shadowAmount);
     
 	// Always re-normalize interpolated direction vectors
@@ -93,7 +84,21 @@ float4 main(VertexToPixel input) : SV_TARGET
 	// Total color for this pixel
     float3 totalColor = float3(0, 0, 0);
 
-    totalColor += shadowAmount * DirLight(worldLight, input.normal, input.worldPos, cameraPosition, specPower, surfaceColor.rgb);
+    totalColor = DirLight(worldLight, input.normal, input.worldPos, cameraPosition, specPower, surfaceColor.rgb);
+    
+    totalColor = lerp(
+        lerp(
+            float3(0, 0, 0),
+            totalColor,
+            ShadowTexture.Sample(BasicSampler, input.uv).x
+        ),
+        totalColor,
+        shadowAmount
+    );
+    
+    
+    
+    //totalColor += shadowAmount * DirLight(worldLight, input.normal, input.worldPos, cameraPosition, specPower, surfaceColor.rgb);
     totalColor = HeightFogColor(10.0f, 15.0f, -2.0f, -3.0f, cameraPosition, input.worldPos, totalColor, float3(0.2f, 0.2f, 0.25f));
     
 	// Gamma correction

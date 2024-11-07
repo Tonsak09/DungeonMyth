@@ -156,6 +156,19 @@ void Game::AddPS(const wchar_t* name, PixelShaders linkedEnum)
 
 	nameToPS.insert(std::pair<const wchar_t*, std::shared_ptr<SimplePixelShader>>(
 		name, pixelShader));
+
+	if (psNameToID.find(name) == psNameToID.end())
+	{
+		// Add new shader combination 
+		psNameToID.insert(
+			std::pair<const wchar_t*, PixelShaders>
+			(name, linkedEnum));
+	}
+	else
+	{
+		// Replace 
+		psNameToID[name] = linkedEnum;
+	}
 }
 
 /// <summary>
@@ -184,7 +197,8 @@ void Game::LoadAssetsAndCreateEntities()
 	AddVS(	L"VertexShader.cso",	VERTEX_SHADER	);
 	AddVS(	L"ShadowVertex.cso",	SHADOW_VERTEX	);
 	AddPS(	L"PixelCommon.cso",		COMMON			);
-	AddPS(	L"SolidColorPS",		SOLID_COLOR		);
+	AddPS(	L"SolidColorPS.cso",	SOLID_COLOR		);
+	AddPS(	L"PixelTriplanar.cso",	TRIPLANAR		);
 
 	// Shaders only needed here 
 	std::shared_ptr<SimpleVertexShader> skyVS = LoadShader(SimpleVertexShader, L"SkyVS.cso");
@@ -209,6 +223,7 @@ void Game::LoadAssetsAndCreateEntities()
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> woodA,  woodN,  woodR,  woodM;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> heronA, heronN, heronR, heronM;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> wandA, wandN, wandR, wandM;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> triFront, triSide, triTop;
 
 	// Load the textures using our succinct LoadTexture() macro
 	LoadTexture(L"../../Assets/Textures/cobblestone_albedo.png", cobbleA);
@@ -248,6 +263,14 @@ void Game::LoadAssetsAndCreateEntities()
 
 	LoadTexture(L"../../Assets/Textures/HeronScissors.png", heronA);
 	LoadTexture(L"../../Assets/Textures/Crowbar_Temp.png", wandA);
+
+	LoadTexture(L"../../Assets/Textures/noise.png", shadowTextureSRV);
+	
+	LoadTexture(L"../../Assets/Textures/test/uv1.png", triFront);
+	LoadTexture(L"../../Assets/Textures/test/uv1.png", triSide);
+	LoadTexture(L"../../Assets/Textures/test/uv1.png", triTop);
+
+
 
 	// Describe and create our sampler state
 	D3D11_SAMPLER_DESC sampDesc = {};
@@ -376,6 +399,31 @@ void Game::LoadAssetsAndCreateEntities()
 	AddTextureSRV(wandRendMat, "NormalMap", woodN);
 	AddTextureSRV(wandRendMat, "RoughnessMap", woodR);
 
+	std::shared_ptr<RendMat> solidCommon =
+		std::make_shared<RendMat>(
+			XMFLOAT3(1, 1, 1),
+			XMFLOAT2(0, 0),
+			XMFLOAT2(1, 1),
+			L"VertexShader.cso",
+			L"PixelCommon.cso"
+		);
+	AddSampler(solidCommon, "BasicSampler", samplerOptions);
+	AddTextureSRV(solidCommon, "Albedo", bronzeM);
+	AddTextureSRV(solidCommon, "NormalMap", woodN);
+	AddTextureSRV(solidCommon, "RoughnessMap", woodR);
+
+	std::shared_ptr<RendMat> triplanar =
+		std::make_shared<RendMat>(
+			XMFLOAT3(1, 1, 1),
+			XMFLOAT2(0, 0),
+			XMFLOAT2(1, 1),
+			L"VertexShader.cso",
+			L"PixelTriplanar.cso"
+		);
+	AddSampler(triplanar, "BasicSampler", samplerOptions);
+	AddTextureSRV(triplanar,	"AlbedoFront",	woodA);
+	AddTextureSRV(triplanar,	"AlbedoSide",	cobbleA);
+	AddTextureSRV(triplanar,	"AlbedoTop",	scratchedA);
 
 
 	// Create the non-PBR entities ==============================
@@ -383,36 +431,36 @@ void Game::LoadAssetsAndCreateEntities()
 	// Generate Cornell-like cube 
 	float yOffset = 1.0f;
 
-	std::shared_ptr<GameEntity> leftWall = std::make_shared<GameEntity>(planeMesh, cobble2xRendMat);
+	std::shared_ptr<GameEntity> leftWall = std::make_shared<GameEntity>(planeMesh, triplanar);
 	leftWall->GetTransform()->SetPosition(-2, yOffset, 0);
 	leftWall->GetTransform()->Rotate(0.0f, 0.0f, -XM_PI / 2.0f);
 	leftWall->GetTransform()->SetScale(2.0f);
 
-	std::shared_ptr<GameEntity> rightWall = std::make_shared<GameEntity>(planeMesh, cobble2xRendMat);
+	std::shared_ptr<GameEntity> rightWall = std::make_shared<GameEntity>(planeMesh, triplanar);
 	rightWall->GetTransform()->SetPosition(2, yOffset, 0);
 	rightWall->GetTransform()->Rotate(-XM_PI / 2.0f, 0.0f, XM_PI / 2.0f);
 	rightWall->GetTransform()->SetScale(2.0f);
 	
-	std::shared_ptr<GameEntity> backWall = std::make_shared<GameEntity>(planeMesh, cobble2xRendMat);
+	std::shared_ptr<GameEntity> backWall = std::make_shared<GameEntity>(planeMesh, triplanar);
 	backWall->GetTransform()->SetPosition(0.0f, yOffset, 2.0f);
 	backWall->GetTransform()->Rotate(-XM_PI / 2.0f, 0.0f, 0.0f);
 	backWall->GetTransform()->SetScale(2.0f);
 
-	std::shared_ptr<GameEntity> floor = std::make_shared<GameEntity>(planeMesh, roughRendMat);
+	std::shared_ptr<GameEntity> floor = std::make_shared<GameEntity>(planeMesh, triplanar);
 	floor->GetTransform()->SetPosition(0.0f, -2.0f + yOffset, 0.0f);
 	floor->GetTransform()->SetScale(2.0f);
 
-	std::shared_ptr<GameEntity> roof = std::make_shared<GameEntity>(planeMesh, roughRendMat);
+	std::shared_ptr<GameEntity> roof = std::make_shared<GameEntity>(planeMesh, triplanar);
 	roof->GetTransform()->SetPosition(0.0f, 2.0f + yOffset, 0.0f);
 	roof->GetTransform()->Rotate(0.0f, 0.0f, XM_PI);
 	roof->GetTransform()->SetScale(2.0f);
 
-	std::shared_ptr<GameEntity> cubeA = std::make_shared<GameEntity>(cubeMesh, paintRendMat);
+	std::shared_ptr<GameEntity> cubeA = std::make_shared<GameEntity>(sphereMesh, triplanar);
 	cubeA->GetTransform()->SetPosition(1.0f, -1.5f + yOffset, 0.0f);
 	cubeA->GetTransform()->Rotate(0.0f, XM_PI / 4.0f, 0.0f);
 	cubeA->GetTransform()->SetScale(1.0f);
 
-	std::shared_ptr<GameEntity> cubeB = std::make_shared<GameEntity>(cubeMesh, bronzeRendMat);
+	std::shared_ptr<GameEntity> cubeB = std::make_shared<GameEntity>(cubeMesh, triplanar);
 	cubeB->GetTransform()->SetPosition(-1.0f, -1.25f + yOffset, 0.0f);
 	cubeB->GetTransform()->Rotate(0.0f, 0.0f, 0.0f);
 	cubeB->GetTransform()->SetScale(1.5f);
@@ -718,6 +766,7 @@ void Game::Draw(float deltaTime, float totalTime)
 			ps,
 			lights[0],
 			playersData->cams[0].transform.GetPosition(),
+			shadowTextureSRV,
 			shadowSRV, shadowSampler,
 			psNameToID
 		);
