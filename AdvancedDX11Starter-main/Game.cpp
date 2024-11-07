@@ -418,8 +418,8 @@ void Game::LoadAssetsAndCreateEntities()
 	cubeB->GetTransform()->SetScale(1.5f);
 
 
-	swordEntity = std::make_shared<GameEntity>(planeMesh, heronRendMat);
-	wandEntity = std::make_shared<GameEntity>(planeMesh, wandRendMat);
+	swordEntity = std::make_shared<GameEntity>(planeMesh, heronRendMat, false);
+	wandEntity = std::make_shared<GameEntity>(planeMesh, wandRendMat, false);
 
 	entities.push_back(leftWall);
 	entities.push_back(rightWall);
@@ -655,6 +655,9 @@ void Game::DrawShadowMap()
 	// Loop and draw all entities
 	for (auto& e : entities)
 	{
+		if (!e->castsShadows) 
+			continue;
+
 		shadowVS->SetMatrix4x4("world", e->GetTransform()->GetWorldMatrix());
 		shadowVS->CopyAllBufferData();
 

@@ -4,9 +4,12 @@ using namespace DirectX;
 
 GameEntity::GameEntity(
 	std::shared_ptr<Mesh> mesh, 
-	std::shared_ptr<RendMat> material) :
+	std::shared_ptr<RendMat> material,
+	bool castShadows) :
 	mesh(mesh),
-	material(material)
+	material(material),
+	castsShadows(castShadows)
+
 {
 }
 

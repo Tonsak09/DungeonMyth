@@ -126,10 +126,6 @@ static void TransformPlayers(PlayersData* data, std::vector<PlayerInput> inputs,
 			DirectX::XMFLOAT3 speed; // Magnitude of vel 
 			DirectX::XMStoreFloat3(&speed, vLength);
 
-			//vel = DirectX::XMVector3ClampLength( // Clamp 
-			//	vel,
-			//	-1.0f,
-			//	1.0);
 
 			// Check if speed is out of range 
 			if (abs(speed.x) >= data->playerMaxSpeed[i])
@@ -286,8 +282,8 @@ static void UpdatePlayerGameLogic(
 
 		heldWand->GetTransform()->SetPosition(sTarget);
 		heldWand->GetTransform()->SetRotation(data->cams[0].transform.GetPitchYawRoll());
-		heldWand->GetTransform()->Rotate(0.0f, 0.0f, rotZSword);
-		heldWand->GetTransform()->Rotate(rotXSword, 0.0f, 0.0f);
+		heldWand->GetTransform()->Rotate(0.0f, 0.0f, rotZWand);
+		heldWand->GetTransform()->Rotate(rotXWand, 0.0f, 0.0f);
 
 		heldWand->GetTransform()->MoveAbsolute(DirectX::XMFLOAT3(0, vertOffset, 0));
 	}

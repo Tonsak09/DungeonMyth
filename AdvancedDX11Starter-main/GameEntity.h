@@ -11,11 +11,17 @@
 class GameEntity
 {
 public:
-	GameEntity(std::shared_ptr<Mesh> mesh, std::shared_ptr<RendMat> material);
+	GameEntity(
+		std::shared_ptr<Mesh> mesh, 
+		std::shared_ptr<RendMat> material,
+		bool castShadows = true);
 
 	std::shared_ptr<Mesh> GetMesh();
 	std::shared_ptr<RendMat> GetMaterial();
 	Transform* GetTransform();
+
+	bool castsShadows;
+
 
 	void SetMesh(std::shared_ptr<Mesh> mesh);
 	void SetMaterial(std::shared_ptr<RendMat> material);
