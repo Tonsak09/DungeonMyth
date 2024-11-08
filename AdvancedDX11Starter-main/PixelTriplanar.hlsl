@@ -23,13 +23,11 @@ cbuffer perFrame : register(b1)
     float3 cameraPosition;
 };
 
+Texture2D AlbedoFront   : register(t1);
+Texture2D AlbedoSide    : register(t2);
+Texture2D AlbedoTop     : register(t3);
 
-
-Texture2D AlbedoFront   : register(t0);
-Texture2D AlbedoSide    : register(t1);
-Texture2D AlbedoTop     : register(t2);
-
-Texture2D ShadowMap     : register(t3);
+Texture2D ShadowMap     : register(t4);
 
 SamplerState BasicSampler : register(s0);
 SamplerComparisonState ShadowSampler : register(s1);
@@ -57,5 +55,4 @@ float4 main(VertexToPixel input) : SV_TARGET
         BasicSampler), 1.0f);
     
     return AlbedoSide.Sample(BasicSampler, input.uv);
-	return float4(1.0f, 1.0f, 1.0f, 1.0f);
 }

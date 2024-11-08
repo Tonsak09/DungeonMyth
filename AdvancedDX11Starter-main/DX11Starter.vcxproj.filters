@@ -202,5 +202,8 @@
     <FxCompile Include="PixelTriplanar.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="TriplanarShadows.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

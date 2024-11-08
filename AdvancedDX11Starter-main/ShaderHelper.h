@@ -34,7 +34,8 @@ enum PixelShaders
 {
 	COMMON,
 	SOLID_COLOR,
-	TRIPLANAR
+	TRIPLANAR,
+	TRIPLANAR_SHADOWS
 };
 
 enum VertexShaders
@@ -181,6 +182,31 @@ static void SetTriplanar(
 	SetMateralPixelData(ps, material);
 }
 
+static void SetTriplanarShadows(
+	std::shared_ptr<RendMat> material,
+	std::shared_ptr<SimplePixelShader> ps,
+	Light dirLight,
+	DirectX::XMFLOAT3 camPos,
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shadowSRV,
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> shadowSampler)
+{
+	// Common pixel shader from material 
+	ps->SetShader();
+
+	// Set data specific to this shader 
+	ps->SetData("worldLight", &dirLight, sizeof(Light));
+	ps->SetFloat3("cameraPosition", camPos);
+	ps->CopyBufferData("perFrame");
+
+	// Set shadowmap shader which is passed in
+	// every frame 
+	ps->SetShaderResourceView("ShadowMap", shadowSRV);
+	ps->SetSamplerState("ShadowSampler", shadowSampler);
+
+	// Set data 
+	PrepareMaterial(material, ps);
+	SetMateralPixelData(ps, material);
+}
 
 /// <summary>
 /// Sets up a lit pixel shader 
@@ -208,6 +234,8 @@ static void SetPixelShader(
 	case TRIPLANAR:
 		SetTriplanar(material, ps, dirLight, camPos, shadowSRV, shadowSampler);
 		break;
+	case TRIPLANAR_SHADOWS:
+		SetTriplanar(material, ps, dirLight, camPos, shadowSRV, shadowSampler);
 	default:
 		break;
 	}
