@@ -33,7 +33,7 @@ Texture2D Albedo : register(t0);
 Texture2D NormalMap : register(t1);
 Texture2D RoughnessMap : register(t2);
 Texture2D ShadowMap : register(t3);
-Texture2D ShadowTexture : register(t4);
+TextureCube Lightbox : register(t4);
 SamplerState BasicSampler : register(s0);
 SamplerComparisonState ShadowSampler : register(s1);
 
@@ -60,7 +60,6 @@ float4 main(VertexToPixel input) : SV_TARGET
         ShadowSampler,
         shadowUV,
         distToLight).r;
-    //shadowAmount = ShadowTexture.Sample(BasicSampler, input.uv);
     shadowAmount = max(0.01f, shadowAmount);
     
 	// Always re-normalize interpolated direction vectors
@@ -86,19 +85,19 @@ float4 main(VertexToPixel input) : SV_TARGET
 
     totalColor = DirLight(worldLight, input.normal, input.worldPos, cameraPosition, specPower, surfaceColor.rgb);
     
-    totalColor = lerp(
-        lerp(
-            float3(0, 0, 0),
-            totalColor,
-            ShadowTexture.Sample(BasicSampler, input.uv).x
-        ),
-        totalColor,
-        shadowAmount
-    );
     
+    totalColor += DirLight(worldLight, input.normal, input.worldPos, cameraPosition, specPower, surfaceColor.rgb);
+    totalColor *= shadowAmount;
+   
+    totalColor += CubeLight(
+    1.0f,
+    input.normal,
+    input.worldPos,
+    cameraPosition,
+    specPower,
+    surfaceColor.rgb,
+    Lightbox.Sample(BasicSampler, input.normal).rgb);
     
-    
-    //totalColor += shadowAmount * DirLight(worldLight, input.normal, input.worldPos, cameraPosition, specPower, surfaceColor.rgb);
     totalColor = HeightFogColor(10.0f, 15.0f, -2.0f, -3.0f, cameraPosition, input.worldPos, totalColor, float3(0.2f, 0.2f, 0.25f));
     
 	// Gamma correction

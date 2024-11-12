@@ -106,19 +106,11 @@ float4 main(VertexToPixel input) : SV_TARGET
     
     float3 tColor = TriplanarColor(input.worldPos, input.normal);
     totalColor = lerp(
-        //lerp(
-        //    float3(0.03529411764705882f, 0.06274509803921569f, 0.3411764705882353f),
-        //    totalColor,
-        //    tColor.x
-        //),
-        float3(0, 49.0f, 97.0f) / 10000.f,
+        tColor * totalColor,
         totalColor,
         shadowAmount
     );
     
-    
-    
-    //totalColor += shadowAmount * DirLight(worldLight, input.normal, input.worldPos, cameraPosition, specPower, surfaceColor.rgb);
     totalColor = HeightFogColor(10.0f, 15.0f, -2.0f, -3.0f, cameraPosition, input.worldPos, totalColor, float3(0.2f, 0.2f, 0.25f));
     
 	// Gamma correction

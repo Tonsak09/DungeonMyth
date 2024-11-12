@@ -318,6 +318,7 @@ void Game::LoadAssetsAndCreateEntities()
 	AddTextureSRV(cobble2xRendMat, "Albedo", cobbleA);
 	AddTextureSRV(cobble2xRendMat, "NormalMap", cobbleN);
 	AddTextureSRV(cobble2xRendMat, "RoughnessMap", cobbleR);
+	AddTextureSRV(cobble2xRendMat, "Lightbox", sky->GetSkySRV());
 
 
 	std::shared_ptr<RendMat> paintRendMat =
@@ -332,7 +333,7 @@ void Game::LoadAssetsAndCreateEntities()
 	AddTextureSRV(paintRendMat, "Albedo", paintA);
 	AddTextureSRV(paintRendMat, "NormalMap", paintN);
 	AddTextureSRV(paintRendMat, "RoughnessMap", paintR);
-
+	AddTextureSRV(paintRendMat, "Lightbox", sky->GetSkySRV());
 
 	std::shared_ptr<RendMat> bronzeRendMat =
 		std::make_shared<RendMat>(
@@ -346,7 +347,7 @@ void Game::LoadAssetsAndCreateEntities()
 	AddTextureSRV(bronzeRendMat, "Albedo", bronzeA);
 	AddTextureSRV(bronzeRendMat, "NormalMap", bronzeN);
 	AddTextureSRV(bronzeRendMat, "RoughnessMap", bronzeR);
-
+	AddTextureSRV(bronzeRendMat, "Lightbox", sky->GetSkySRV());
 
 	std::shared_ptr<RendMat> roughRendMat =
 		std::make_shared<RendMat>(
@@ -360,7 +361,7 @@ void Game::LoadAssetsAndCreateEntities()
 	AddTextureSRV(roughRendMat, "Albedo", roughA);
 	AddTextureSRV(roughRendMat, "NormalMap", roughN);
 	AddTextureSRV(roughRendMat, "RoughnessMap", roughR);
-
+	AddTextureSRV(roughRendMat, "Lightbox", sky->GetSkySRV());
 
 	std::shared_ptr<RendMat> woodRendMat =
 		std::make_shared<RendMat>(
@@ -374,7 +375,7 @@ void Game::LoadAssetsAndCreateEntities()
 	AddTextureSRV(woodRendMat, "Albedo", woodA);
 	AddTextureSRV(woodRendMat, "NormalMap", woodN);
 	AddTextureSRV(woodRendMat, "RoughnessMap", woodR);
-
+	AddTextureSRV(woodRendMat, "Lightbox", sky->GetSkySRV());
 
 	std::shared_ptr<RendMat> heronRendMat =
 		std::make_shared<RendMat>(
@@ -388,6 +389,7 @@ void Game::LoadAssetsAndCreateEntities()
 	AddTextureSRV(heronRendMat, "Albedo", heronA);
 	AddTextureSRV(heronRendMat, "NormalMap", woodN);
 	AddTextureSRV(heronRendMat, "RoughnessMap", woodR);
+	AddTextureSRV(heronRendMat, "Lightbox", sky->GetSkySRV());
 
 	std::shared_ptr<RendMat> wandRendMat =
 		std::make_shared<RendMat>(
@@ -401,6 +403,7 @@ void Game::LoadAssetsAndCreateEntities()
 	AddTextureSRV(wandRendMat, "Albedo", wandA);
 	AddTextureSRV(wandRendMat, "NormalMap", woodN);
 	AddTextureSRV(wandRendMat, "RoughnessMap", woodR);
+	AddTextureSRV(wandRendMat, "Lightbox", sky->GetSkySRV());
 
 	std::shared_ptr<RendMat> solidCommon =
 		std::make_shared<RendMat>(
@@ -411,9 +414,10 @@ void Game::LoadAssetsAndCreateEntities()
 			L"PixelCommon.cso"
 		);
 	AddSampler(solidCommon, "BasicSampler", samplerOptions);
-	AddTextureSRV(solidCommon, "Albedo", bronzeM);
+	AddTextureSRV(solidCommon, "Albedo", scratchedA);
 	AddTextureSRV(solidCommon, "NormalMap", woodN);
 	AddTextureSRV(solidCommon, "RoughnessMap", woodR);
+	AddTextureSRV(solidCommon, "Lightbox", sky->GetSkySRV());
 
 	std::shared_ptr<RendMat> triplanar =
 		std::make_shared<RendMat>(
@@ -448,36 +452,36 @@ void Game::LoadAssetsAndCreateEntities()
 	// Generate Cornell-like cube 
 	float yOffset = 1.0f;
 
-	std::shared_ptr<GameEntity> leftWall = std::make_shared<GameEntity>(planeMesh, triplanarShadows);
+	std::shared_ptr<GameEntity> leftWall = std::make_shared<GameEntity>(planeMesh, solidCommon);
 	leftWall->GetTransform()->SetPosition(-2, yOffset, 0);
 	leftWall->GetTransform()->Rotate(0.0f, 0.0f, -XM_PI / 2.0f);
 	leftWall->GetTransform()->SetScale(2.0f);
 
-	std::shared_ptr<GameEntity> rightWall = std::make_shared<GameEntity>(planeMesh, triplanarShadows);
+	std::shared_ptr<GameEntity> rightWall = std::make_shared<GameEntity>(planeMesh, solidCommon);
 	rightWall->GetTransform()->SetPosition(2, yOffset, 0);
 	rightWall->GetTransform()->Rotate(-XM_PI / 2.0f, 0.0f, XM_PI / 2.0f);
 	rightWall->GetTransform()->SetScale(2.0f);
 	
-	std::shared_ptr<GameEntity> backWall = std::make_shared<GameEntity>(planeMesh, triplanarShadows);
+	std::shared_ptr<GameEntity> backWall = std::make_shared<GameEntity>(planeMesh, solidCommon);
 	backWall->GetTransform()->SetPosition(0.0f, yOffset, 2.0f);
 	backWall->GetTransform()->Rotate(-XM_PI / 2.0f, 0.0f, 0.0f);
 	backWall->GetTransform()->SetScale(2.0f);
 
-	std::shared_ptr<GameEntity> floor = std::make_shared<GameEntity>(planeMesh, triplanarShadows);
+	std::shared_ptr<GameEntity> floor = std::make_shared<GameEntity>(planeMesh, solidCommon);
 	floor->GetTransform()->SetPosition(0.0f, -2.0f + yOffset, 0.0f);
 	floor->GetTransform()->SetScale(2.0f);
 
-	std::shared_ptr<GameEntity> roof = std::make_shared<GameEntity>(planeMesh, triplanarShadows);
+	std::shared_ptr<GameEntity> roof = std::make_shared<GameEntity>(planeMesh, solidCommon);
 	roof->GetTransform()->SetPosition(0.0f, 2.0f + yOffset, 0.0f);
 	roof->GetTransform()->Rotate(0.0f, 0.0f, XM_PI);
 	roof->GetTransform()->SetScale(2.0f);
 
-	std::shared_ptr<GameEntity> cubeA = std::make_shared<GameEntity>(sphereMesh, triplanarShadows);
+	std::shared_ptr<GameEntity> cubeA = std::make_shared<GameEntity>(sphereMesh, solidCommon);
 	cubeA->GetTransform()->SetPosition(1.0f, -1.5f + yOffset, 0.0f);
 	cubeA->GetTransform()->Rotate(0.0f, XM_PI / 4.0f, 0.0f);
 	cubeA->GetTransform()->SetScale(1.0f);
 
-	std::shared_ptr<GameEntity> cubeB = std::make_shared<GameEntity>(cubeMesh, triplanarShadows);
+	std::shared_ptr<GameEntity> cubeB = std::make_shared<GameEntity>(cubeMesh, solidCommon);
 	cubeB->GetTransform()->SetPosition(-1.0f, -1.25f + yOffset, 0.0f);
 	cubeB->GetTransform()->Rotate(0.0f, 0.0f, 0.0f);
 	cubeB->GetTransform()->SetScale(1.5f);
@@ -654,10 +658,10 @@ void Game::Update(float deltaTime, float totalTime)
 	// Update the player
 	std::vector<PlayerInput> inputs = PlayersInputs(updateMouseDelta);
 	TransformPlayers(playersData.get(), inputs, deltaTime);
-	UpdatePlayerGameLogic(
+	/*UpdatePlayerGameLogic(
 		playersData.get(),
 		swordEntity, wandEntity,
-		deltaTime);
+		deltaTime);*/
 
 	// Check individual input
 	Input& input = Input::GetInstance();
@@ -768,7 +772,7 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-
+	
 	for (auto group : entityGroups)
 	{
 		// Pixel shader is set for entire group 
@@ -776,7 +780,7 @@ void Game::Draw(float deltaTime, float totalTime)
 
 		std::shared_ptr<SimplePixelShader> ps = nameToPS[group[0]->GetMaterial()->psName];
 
-		 
+		
 
 		SetPixelShader(
 			group[0]->GetMaterial(),
@@ -787,6 +791,12 @@ void Game::Draw(float deltaTime, float totalTime)
 			shadowSRV, shadowSampler,
 			psNameToID
 		);
+
+		// TODO: Optimization is having setting of the shaders not 
+		//		 reset repeated data. We can have a stored enum to 
+		//		 remember the previously set shader and pass in a
+		//		 bool that indicates whether to use set an entire
+		//		 new shader or simply update necessary items 
 
 		for (auto entity : group)
 		{

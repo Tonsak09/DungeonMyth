@@ -67,6 +67,7 @@ public:
 
 	void Draw(std::shared_ptr<FreeCamera> camera);
 	void Draw(Camera* camera);
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetSkySRV();
 
 private:
 

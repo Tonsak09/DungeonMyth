@@ -99,6 +99,30 @@ float3 DirLight(Light light, float3 normal, float3 worldPos, float3 camPos, floa
 	return (diff * surfaceColor + spec) * light.Intensity * light.Color;
 }
 
+float3 CubeLight(
+float intensity, 
+float3 normal, 
+float3 worldPos, 
+float3 camPos, 
+float shininess, 
+float3 surfaceColor, 
+float3 lightColor)
+{
+	// Get normalize direction to the light
+    float3 toLight = normal;
+    float3 toCam = normalize(camPos - worldPos);
+
+	// Calculate the light amounts
+    float diff = Diffuse(normal, toLight);
+    float spec = SpecularBlinnPhong(normal, toLight, toCam, shininess);
+
+	
+	
+	// Combine
+
+    return (diff * surfaceColor + spec) * intensity * lightColor;
+}
+
 
 float3 PointLight(Light light, float3 normal, float3 worldPos, float3 camPos, float shininess, float3 surfaceColor)
 {

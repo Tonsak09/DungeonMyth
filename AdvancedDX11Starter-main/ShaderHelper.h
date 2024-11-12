@@ -121,7 +121,6 @@ static void SetCommonPixel(
 	std::shared_ptr<SimplePixelShader> ps,
 	Light dirLight,
 	DirectX::XMFLOAT3 camPos,
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shadowTextureSRV,
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shadowSRV,
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> shadowSampler)
 {
@@ -138,8 +137,6 @@ static void SetCommonPixel(
 	// every frame 
 	ps->SetShaderResourceView("ShadowMap", shadowSRV);
 	ps->SetSamplerState("ShadowSampler", shadowSampler);
-
-	ps->SetShaderResourceView("ShadowTexture", shadowTextureSRV);
 
 	// Set data 
 	SetMateralPixelData(ps, material);
@@ -227,7 +224,7 @@ static void SetPixelShader(
 	switch (type)
 	{
 	case COMMON:
-		SetCommonPixel(material, ps, dirLight, camPos, shadowTextureSRV, shadowSRV, shadowSampler);
+		SetCommonPixel(material, ps, dirLight, camPos, shadowSRV, shadowSampler);
 		break;
 	case SOLID_COLOR:
 		break;

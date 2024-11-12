@@ -282,3 +282,9 @@ Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Sky::CreateCubemap(
 	// Send back the SRV, which is what we need for our shaders
 	return cubeSRV;
 }
+
+
+Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Sky::GetSkySRV()
+{
+	return skySRV;
+}
