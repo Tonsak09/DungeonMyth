@@ -693,6 +693,11 @@ void Game::Update(float deltaTime, float totalTime)
 // --------------------------------------------------------
 void Game::DrawShadowMap()
 {
+	// TODO: This does not actually need to be drawn every loop.
+	//		 Since our static objects do not actually move around
+	//		 and the lighting also does not move then we can continue
+	//		 to reuse the same shadow map 
+
 	// Set to shadow rasterizer 
 	context->RSSetState(shadowRasterizer.Get());
 
