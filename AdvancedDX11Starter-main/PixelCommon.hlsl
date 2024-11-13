@@ -85,11 +85,7 @@ float4 main(VertexToPixel input) : SV_TARGET
 
     totalColor = DirLight(worldLight, input.normal, input.worldPos, cameraPosition, specPower, surfaceColor.rgb);
     
-    
-    totalColor += DirLight(worldLight, input.normal, input.worldPos, cameraPosition, specPower, surfaceColor.rgb);
-    totalColor *= shadowAmount;
-   
-    totalColor += CubeLight(
+    totalColor = CubeLight(
     1.0f,
     input.normal,
     input.worldPos,
@@ -97,6 +93,9 @@ float4 main(VertexToPixel input) : SV_TARGET
     specPower,
     surfaceColor.rgb,
     Lightbox.Sample(BasicSampler, input.normal).rgb);
+    
+    totalColor *= shadowAmount;
+    
     
     totalColor = HeightFogColor(10.0f, 15.0f, -2.0f, -3.0f, cameraPosition, input.worldPos, totalColor, float3(0.2f, 0.2f, 0.25f));
     

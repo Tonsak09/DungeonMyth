@@ -18,6 +18,8 @@
 #include "DebugDrawManager.h"
 #include "ShaderHelper.h"
 
+#include "Renderer.h"
+
 class Game 
 	: public DXCore
 {
@@ -96,7 +98,7 @@ private:
 
 	const int SHADOW_MAP_RESOLUTION = 2048;
 
-	
+	std::shared_ptr<Renderer> renderer;
 
 
 	// General helpers for setup and drawing

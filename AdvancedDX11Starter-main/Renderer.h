@@ -20,7 +20,6 @@ public:
 
 		bool vsync,
 		bool deviceSupportsTearing,
-		BOOL isFullscreen, 
 
 		// TODO: Generate internally 
 		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> shadowDSV,
@@ -33,17 +32,24 @@ public:
 		Microsoft::WRL::ComPtr<ID3D11SamplerState> shadowSampler,
 
 		std::vector<std::vector<std::shared_ptr<GameEntity>>> entityGroups,
+		std::vector<std::shared_ptr<GameEntity>> entities,
+		std::shared_ptr<Sky> sky,
+
 		// TODO: Generate internally 
 		std::unordered_map<const wchar_t*, std::shared_ptr<SimpleVertexShader>> nameToVS,
 		std::unordered_map<const wchar_t*, std::shared_ptr<SimplePixelShader>> nameToPS,
 		std::unordered_map<const wchar_t*, std::shared_ptr<RendMat>> nameToMat);
-	~Renderer();
 
-private:
 	void DrawToTargetBuffer(
 		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> targetBuffer,
 		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthBufferDSV, 
-		std::shared_ptr<Camera> camPos);
+		Camera* cam);
+	
+	void Resize(
+		unsigned int _windowWidth, unsigned int _windowHeight,
+		float _targetSizeX, float _targetSizeY);
+
+private:
 
 	// DirectX 
 	Microsoft::WRL::ComPtr<IDXGISwapChain>		swapChain;
@@ -57,7 +63,8 @@ private:
 
 	
 	// Entity management 
-	std::vector<std::vector<std::shared_ptr<GameEntity>>> entityGroups;
+	std::vector<std::shared_ptr<GameEntity>> entities; // All Entities 
+	std::vector<std::vector<std::shared_ptr<GameEntity>>> entityGroups; // Entities grouped into shaders 
 
 	// Shaders
 	std::unordered_map<const wchar_t*, std::shared_ptr<SimpleVertexShader>> nameToVS;
@@ -77,6 +84,10 @@ private:
 	DirectX::XMFLOAT4X4 shadowViewMatrix;
 	DirectX::XMFLOAT4X4 shadowProjectionMatrix;
 
+	void DrawShadowMap(
+		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> targetBuffer,
+		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthBufferDSV);
+
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> shadowRasterizer;
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> shadowSampler;
 
@@ -84,4 +95,13 @@ private:
 
 	// Skybox
 	std::shared_ptr<Sky> sky;
+
+
+	// Window
+	unsigned int windowWidth;
+	unsigned int windowHeight;
+
+	float targetSizeX;
+	float targetSizeY;
+
 };
